@@ -2,12 +2,15 @@
 
 namespace App\Models\Auth;
 
+use App\Models\Common\Company;
+use App\Models\Common\Contact;
 use App\Traits\Tenants;
 use App\Notifications\Auth\Reset;
 use App\Traits\Media;
 use App\Traits\Users;
 use Date;
 use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,6 +19,13 @@ use Kyslik\ColumnSortable\Sortable;
 use Laratrust\Traits\LaratrustUserTrait;
 use Lorisleiva\LaravelSearchString\Concerns\SearchString;
 
+/**
+ * Class User
+ *
+ * @package App\Models\Auth
+ * @property Collection|Company[] $companies
+ * @property Contact $contact
+ */
 class User extends Authenticatable implements HasLocalePreference
 {
     use HasFactory, LaratrustUserTrait, Notifiable, SearchString, SoftDeletes, Sortable, Media, Tenants, Users;

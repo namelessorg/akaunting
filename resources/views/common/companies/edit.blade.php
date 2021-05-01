@@ -1,3 +1,8 @@
+@php
+/**
+ * @var \App\Models\Common\Company $company
+ */
+@endphp
 @extends('layouts.admin')
 
 @section('title', trans('general.title.edit', ['type' => trans_choice('general.companies', 1)]))

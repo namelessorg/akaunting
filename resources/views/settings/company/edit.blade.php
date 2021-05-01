@@ -12,7 +12,7 @@
         'files' => true,
         'role' => 'form',
         'class' => 'form-loading-button',
-        'novalidate' => true
+        'novalidate' => false
     ]) !!}
 
     <div class="card">
@@ -22,11 +22,11 @@
 
                 {{ Form::textGroup('email', trans('settings.company.email'), 'envelope', ['required' => 'required'], setting('company.email')) }}
 
-                {{ Form::textGroup('tax_number', trans('general.tax_number'), 'percent', [], setting('company.tax_number')) }}
+                {{-- Form::textGroup('tax_number', trans('general.tax_number'), 'percent', [], setting('company.tax_number')) --}}
 
-                {{ Form::textGroup('phone', trans('settings.company.phone'), 'phone', [], setting('company.phone')) }}
+                {{ Form::numberGroup('telegram_channel_id', 'Telegram channel id', 'paper-plane', ['required' => 'required'], setting('company.telegram_channel_id')) }}
 
-                {{ Form::textareaGroup('address', trans('settings.company.address'), null, setting('company.address')) }}
+                {{ Form::textGroup('telegram_observer_token', 'Telegram observer token', 'paper-plane', ['required' => 'required', 'placeholder' => 'https://api.telegram.org/bot<token>/'], setting('company.telegram_observer_token')) }}
 
                 {{ Form::fileGroup('logo', trans('settings.company.logo'), 'file-image-o', [], setting('company.logo')) }}
             </div>

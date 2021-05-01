@@ -24,7 +24,7 @@ return [
     'roles'                 => 'Role|Roles',
     'permissions'           => 'Permission|Permissions',
     'modules'               => 'App|Apps',
-    'companies'             => 'Company|Companies',
+    'companies'             => 'Telegram account|Telegram accounts',
     'profits'               => 'Profit|Profits',
     'taxes'                 => 'Tax|Taxes',
     'logos'                 => 'Logo|Logos',

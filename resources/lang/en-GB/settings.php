@@ -7,6 +7,7 @@ return [
         'name'                       => 'Name',
         'email'                      => 'Email',
         'phone'                      => 'Phone',
+        'telegram'                   => 'Telegram',
         'address'                    => 'Address',
         'edit_your_business_address' => 'Edit your business address',
         'logo'                       => 'Logo',

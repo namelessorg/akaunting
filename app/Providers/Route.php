@@ -102,7 +102,7 @@ class Route extends Provider
      */
     public function map()
     {
-        $this->mapInstallRoutes();
+        //$this->mapInstallRoutes();
 
         $this->mapApiRoutes();
 
@@ -117,6 +117,8 @@ class Route extends Provider
         $this->mapPortalRoutes();
 
         $this->mapSignedRoutes();
+
+        $this->mapTelegramRoutes();
     }
 
     /**
@@ -237,6 +239,21 @@ class Route extends Provider
             ->middleware('signed')
             ->namespace($this->namespace)
             ->group(base_path('routes/signed.php'));
+    }
+
+    /**
+     * Define the "telegram" routes for the application.
+     *
+     * These routes all receive session state, without CSRF protection, etc.
+     *
+     * @return void
+     */
+    protected function mapTelegramRoutes()
+    {
+        Facade::prefix('{company_id}/telegram')
+            ->middleware('telegram')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/telegram.php'));
     }
 
     /**

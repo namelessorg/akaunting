@@ -37,14 +37,8 @@ class Kernel extends HttpKernel
             'session.errors',
             'csrf',
             'install.redirect',
-            'header.x',
             'language',
             'firewall.all',
-        ],
-
-        'install' => [
-            'web',
-            'install.can',
         ],
 
         'api' => [
@@ -100,6 +94,10 @@ class Kernel extends HttpKernel
             'permission:read-client-portal',
         ],
 
+        'telegram' => [
+            'bindings',
+        ],
+
         'signed' => [
             'cookies.encrypt',
             'cookies.response',
@@ -109,7 +107,6 @@ class Kernel extends HttpKernel
             'signature',
             'company.identify',
             'bindings',
-            'header.x',
             'language',
             'firewall.all',
         ],
@@ -146,7 +143,6 @@ class Kernel extends HttpKernel
         'auth.redirect' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'company.identify' => \App\Http\Middleware\IdentifyCompany::class,
         'dropzone' => \App\Http\Middleware\Dropzone::class,
-        'header.x' => \App\Http\Middleware\AddXHeader::class,
         'menu.admin' => \App\Http\Middleware\AdminMenu::class,
         'menu.portal' => \App\Http\Middleware\PortalMenu::class,
         'date.format' => \App\Http\Middleware\DateFormat::class,

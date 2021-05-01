@@ -1,0 +1,56 @@
+version: '3.7'
+
+volumes:
+  db_data: { }
+
+services:
+  database:
+    image: "mysql:latest"
+    environment:
+      MYSQL_DATABASE: "$DB_DATABASE"
+      MYSQL_USER: "$DB_USERNAME"
+      MYSQL_PASSWORD: "$DB_PASSWORD"
+      MYSQL_ROOT_PASSWORD: "$MYSQL_ROOT_PASSWORD"
+    restart: unless-stopped
+    healthcheck:
+      test: mysqladmin ping -uroot -p$$MYSQL_ROOT_PASSWORD
+    volumes:
+      - db_data:/var/lib/mysql:rw
+    ports:
+      - "3306:3306"
+
+  node:
+    volumes:
+      - ./:/var/www
+    image: "node:16-alpine"
+
+  nginx:
+    image: "nginx:latest"
+    depends_on:
+      - app
+    restart: unless-stopped
+    volumes:
+      - ".:/app"
+      - "./docker/nginx:/etc/nginx/conf.d"
+    healthcheck:
+      test: "true"
+    ports:
+      - "8090:80"
+    working_dir: /app
+
+  app:
+    build:
+      context: ./
+      dockerfile: docker/php/Dockerfile
+      args:
+        PUID: "1000"
+        PHP_INSTALL_XDEBUG: "true"
+    depends_on:
+      - database
+    restart: unless-stopped
+    environment:
+      PHP_IDE_CONFIG: "serverName=accouting"
+    volumes:
+      - .:/app:rw
+      # enable xdebug
+      - ./docker/php/fpm-xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini

@@ -39,6 +39,7 @@
         "guzzlehttp/guzzle": "^7.0.1",
         "intervention/image": "2.5.*",
         "intervention/imagecache": "^2.5",
+        "irazasyed/telegram-bot-sdk": "^3.4",
         "kyslik/column-sortable": "^6.0",
         "laracasts/flash": "3.2.*",
         "laravel/framework": "^8.12",

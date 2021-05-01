@@ -31,7 +31,7 @@ class Company extends FormRequest
 
         return [
             'name' => 'required|string',
-            'email' => 'required|email',
+            'telegram' => 'required|numeric',
             'currency' => 'required|string',
             'domain' => 'nullable|string',
             'logo' => $logo,

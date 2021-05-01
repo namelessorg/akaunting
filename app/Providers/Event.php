@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Listeners\Telegram\UpdateWasReceivedListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as Provider;
+use Telegram\Bot\Events\UpdateWasReceived;
 
 class Event extends Provider
 {
@@ -85,6 +87,9 @@ class Event extends Provider
         ],
         'App\Events\Module\Uninstalled' => [
             'App\Listeners\Module\FinishUninstallation',
+        ],
+        UpdateWasReceived::class => [
+            UpdateWasReceivedListener::class,
         ],
     ];
 

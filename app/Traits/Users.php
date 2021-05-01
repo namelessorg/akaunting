@@ -30,7 +30,7 @@ trait Users
         }
 
         $company = $user->withoutEvents(function () use ($user, $id) {
-            return $user->companies()->where('id', $id)->first();
+            return $user->companies->where('id', $id)->first();
         });
 
         return !empty($company);

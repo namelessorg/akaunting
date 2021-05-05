@@ -73,6 +73,7 @@ class AddAdminItems
         }
 
         // Purchases
+        /*
         if ($user->canAny(['read-purchases-bills', 'read-purchases-payments', 'read-purchases-vendors'])) {
             $menu->dropdown(trim(trans_choice('general.purchases', 2)), function ($sub) use ($user, $attr) {
                 if ($user->can('read-purchases-bills')) {
@@ -90,7 +91,7 @@ class AddAdminItems
                 'title' => trans_choice('general.purchases', 2),
                 'icon' => 'fa fa-shopping-cart',
             ]);
-        }
+        }*/
 
         // Banking
         if ($user->canAny(['read-banking-accounts', 'read-banking-transfers', 'read-banking-transactions', 'read-banking-reconciliations'])) {

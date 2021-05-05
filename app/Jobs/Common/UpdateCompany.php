@@ -6,12 +6,16 @@ use App\Abstracts\Job;
 use App\Events\Common\CompanyUpdated;
 use App\Events\Common\CompanyUpdating;
 use App\Models\Common\Company;
+use App\Services\TelegramService;
 use App\Traits\Users;
 
 class UpdateCompany extends Job
 {
     use Users;
 
+    /**
+     * @var Company
+     */
     protected $company;
 
     protected $request;
@@ -65,6 +69,18 @@ class UpdateCompany extends Job
 
             if ($this->request->has('address')) {
                 setting()->set('company.address', $this->request->get('address'));
+            }
+
+            if ($this->request->has('telegram_channel_id')) {
+                setting()->set('company.telegram_channel_id', $this->request->get('telegram_channel_id'));
+            }
+
+            if ($this->request->has('telegram_observer_token')) {
+                setting()->set('company.telegram_observer_token', $this->request->get('telegram_observer_token'));
+            }
+
+            if ($this->request->get('install_webhook', false)) {
+                app(TelegramService::class)->setWebhook(setting('company.telegram_observer_token'));
             }
 
             if ($this->request->has('currency')) {

@@ -59,7 +59,7 @@ class Contact extends FormRequest
             'name' => 'required|string',
             'email' => $email,
             'user_id' => 'integer|nullable',
-            'currency_code' => 'required|string|currency',
+            'currency_code' => 'sometimes|string|currency',
             'password' => $required . 'confirmed',
             'enabled' => 'integer|boolean',
         ];

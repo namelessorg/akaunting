@@ -88,9 +88,6 @@ class Event extends Provider
         'App\Events\Module\Uninstalled' => [
             'App\Listeners\Module\FinishUninstallation',
         ],
-        UpdateWasReceived::class => [
-            UpdateWasReceivedListener::class,
-        ],
     ];
 
     /**

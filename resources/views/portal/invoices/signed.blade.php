@@ -4,21 +4,15 @@
 
 @section('new_button')
     @stack('button_print_start')
-    <a href="{{ $print_action }}" target="_blank" class="btn btn-white btn-sm">
-        {{ trans('general.print') }}
-    </a>
+
     @stack('button_print_end')
 
     @stack('button_pdf_start')
-    <a href="{{ $pdf_action }}" class="btn btn-white btn-sm">
-        {{ trans('general.download') }}
-    </a>
+
     @stack('button_pdf_end')
 
     @stack('button_dashboard_start')
-        <a href="{{ route('portal.dashboard') }}" class="btn btn-white btn-sm">
-            {{ trans('invoices.all_invoices') }}
-        </a>
+
     @stack('button_dashboard_end')
 @endsection
 

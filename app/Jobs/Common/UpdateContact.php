@@ -6,10 +6,14 @@ use App\Abstracts\Job;
 use App\Models\Auth\Role;
 use App\Models\Auth\User;
 use App\Models\Common\Contact;
+use App\Services\TelegramService;
 use Illuminate\Support\Str;
 
 class UpdateContact extends Job
 {
+    /**
+     * @var Contact
+     */
     protected $contact;
 
     protected $request;
@@ -50,6 +54,22 @@ class UpdateContact extends Job
             }
 
             $this->contact->update($this->request->all());
+
+            $telegramService = app(TelegramService::class);
+            if ($this->contact->isCustomer() && $this->request->has('enabled')) {
+                if ($this->request->get('enabled', false)) {
+                    $telegramService->addUser(
+                        $this->contact,
+                        $this->contact->company
+                    );
+                    logger("Contact#{$this->contact->id} added to telegram group for company# `{$this->contact->company->name}` from admin update contact");
+                } else {
+                    $telegramService->kick(
+                        $this->contact,
+                        $this->contact->company);
+                    logger("Contact#{$this->contact->id} kicked from telegram group for company# `{$this->contact->company->name}` from admin update contact");
+                }
+            }
         });
 
         return $this->contact;

@@ -63,7 +63,10 @@ class Settings extends Controller
             $settings[$alias] = $setting;
         }
 
-        return $this->response('settings.settings.index', ['modules' => $settings]);
+        return $this->response('settings.settings.index', [
+            'modules' => $settings,
+            'currentCompanyId' => company_id(),
+        ]);
     }
 
     /**

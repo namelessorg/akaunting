@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Telegram;
 
 use App\Abstracts\Http\Controller;
 use App\Models\Common\Company;
+use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Psr\Log\LoggerInterface;
 use Telegram\Bot\Api;
@@ -15,10 +16,22 @@ class Webhook extends Controller
      */
     private $logger;
 
-    public function __construct(LoggerInterface $logger)
+    /**
+     * @var TelegramService
+     */
+    private $telegramService;
+
+    /**
+     * @var Api
+     */
+    private $telegram;
+
+    public function __construct(LoggerInterface $logger, TelegramService $telegramService, Api $telegram)
     {
         parent::__construct();
         $this->logger = $logger;
+        $this->telegramService = $telegramService;
+        $this->telegram = $telegram;
     }
 
     public function handle(Request $request, Company $companyId, string $token): void
@@ -30,7 +43,12 @@ class Webhook extends Controller
 
         $companyId->makeCurrent(true);
         $companyBotToken = setting('company.telegram_observer_token');
-        $channelId = setting('company.telegram_channel_id');
+        if (!$companyId->enabled) {
+            $this->logger->debug('Received message on disabled company', [
+                'input' => file_get_contents('php://input'),
+            ]);
+            return;
+        }
         if (!hash_equals($token, $companyBotToken)) {
             $this->logger->warning('Unexpected observer token', [
                 'expected' => $companyBotToken,
@@ -39,8 +57,14 @@ class Webhook extends Controller
             return;
         }
 
-        $telegram = new Api($companyBotToken);
-        $telegram->getWebhookUpdate(false);
+        $this->telegram->setAccessToken($companyBotToken);
+        $this->telegram->commandsHandler(true);
+        $this->telegramService->handleUpdate(
+            $companyId,
+            $this->telegram,
+            $this->telegram->getWebhookUpdate(false)
+        );
+        $this->telegram->setAccessToken('empty');
     }
 
     public function assignPermissionsToController(): void

@@ -2,13 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Events\Document\DocumentReminded;
 use App\Models\Common\Company;
-use App\Models\Document\Document;
-use App\Notifications\Sale\Invoice as Notification;
-use App\Utilities\Overrider;
-use Date;
+use App\Models\Common\Contact;
 use Illuminate\Console\Command;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Carbon;
+use Telegram\Bot\Api;
 
 class UserExpirationReminder extends Command
 {
@@ -29,27 +28,22 @@ class UserExpirationReminder extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         // Disable model cache
         config(['laravel-model-caching.enabled' => false]);
 
         // Get all companies
-        $companies = Company::enabled()->withCount('invoices')->cursor();
+        /** @var Company $companies */
+        $companies = Company::query()->enabled()->cursor();
+        $telegram = $this->laravel->get(Api::class);
 
         foreach ($companies as $company) {
-            // Has company invoices
-            if (!$company->invoices_count) {
-                continue;
-            }
-
-            $this->info('Sending invoice reminders for ' . $company->name . ' company.');
-
-            // Set company
+            /** @var Contact[] $customers */
+            /** @var Company $company */
             $company->makeCurrent();
-
+            $telegram->setAccessToken($company->telegram_observer_token);
             // Don't send reminders if disabled
             if (!setting('schedule.send_invoice_reminder')) {
                 $this->info('Invoice reminders disabled by ' . $company->name . '.');
@@ -57,34 +51,36 @@ class UserExpirationReminder extends Command
                 continue;
             }
 
-            $days = explode(',', setting('schedule.invoice_days'));
+            $days = preg_split('/\D/', setting('schedule.invoice_days', 1));
+            $customers = $company
+                ->customers()
+                ->where('enabled', true)
+                ->whereNested(function (Builder $builder) use ($days) {
+                    foreach ($days as $day) {
+                        $builder->orWhere(\DB::raw('DATEDIFF(expires_at, NOW())'), $day);
+                    }
+                    $builder->orWhere('expires_at', '<=', now());
+                })
+                ->cursor();
 
-            foreach ($days as $day) {
-                $day = (int) trim($day);
+            foreach ($customers as $customer) {
+                $this->info('Sending invoice reminders for ' . $company->id . ' company.');
 
-                $this->remind($day);
+                $e = null;
+                $message = null;
+                try {
+                    $message = $telegram->sendMessage([
+                        'chat_id' => $customer->telegram_chat_id,
+                        'text' => now()->diffForHumans($customer->expires_at).' expiration, need to pay the subscription for renew access',
+                    ]);
+                } catch (\Throwable $e) {}
+                logger('Sent expiration message', [
+                    'message' => $message ? $message->toArray() : null,
+                    'exception' => $e,
+                ]);
             }
         }
 
         Company::forgetCurrent();
-    }
-
-    protected function remind($day)
-    {
-        // Get due date
-        $date = Date::today()->subDays($day)->toDateString();
-
-        // Get upcoming invoices
-        $invoices = Document::invoice()->with('contact')->accrued()->notPaid()->due($date)->cursor();
-
-        foreach ($invoices as $invoice) {
-            try {
-                event(new DocumentReminded($invoice, Notification::class));
-            } catch (\Exception | \Throwable | \Swift_RfcComplianceException | \Illuminate\Database\QueryException $e) {
-                $this->error($e->getMessage());
-
-                logger('Invoice reminder:: ' . $e->getMessage());
-            }
-        }
     }
 }

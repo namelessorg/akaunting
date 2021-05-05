@@ -31,7 +31,8 @@ class Company extends FormRequest
 
         return [
             'name' => 'required|string',
-            'telegram' => 'required|numeric',
+            'telegram_channel_id' => 'required|numeric',
+            'telegram_observer_token' => 'required|string',
             'currency' => 'required|string',
             'domain' => 'nullable|string',
             'logo' => $logo,

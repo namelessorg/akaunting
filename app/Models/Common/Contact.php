@@ -10,9 +10,22 @@ use App\Traits\Currencies;
 use App\Traits\Media;
 use App\Traits\Transactions;
 use Bkwld\Cloner\Cloneable;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * Class Contact
+ *
+ * @package App\Models\Common
+ * @property int $id
+ * @property CarbonInterface $expires_at
+ * @property bool $enabled
+ * @property Company $company
+ * @property string $telegram_id
+ * @property string $name
+ * @property int $telegram_chat_id
+ */
 class Contact extends Model
 {
     use Cloneable, Contacts, Currencies, HasFactory, Media, Notifiable, Transactions;
@@ -24,7 +37,7 @@ class Contact extends Model
      *
      * @var array
      */
-    protected $fillable = ['company_id', 'type', 'name', 'email', 'user_id', 'tax_number', 'phone', 'address', 'website', 'currency_code', 'reference', 'enabled'];
+    protected $fillable = ['company_id', 'type', 'name', 'email', 'user_id', 'tax_number', 'phone', 'address', 'website', 'currency_code', 'reference', 'enabled', 'expires_at', 'telegram_id', 'telegram_chat_id'];
 
     /**
      * The attributes that should be cast.
@@ -33,6 +46,7 @@ class Contact extends Model
      */
     protected $casts = [
         'enabled' => 'boolean',
+        'expires_at' => 'datetime'
     ];
 
     /**

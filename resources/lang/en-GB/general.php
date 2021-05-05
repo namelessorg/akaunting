@@ -89,6 +89,7 @@ return [
     'description'           => 'Description',
     'manage'                => 'Manage',
     'code'                  => 'Code',
+    'telegram'              => 'Telegram',
     'alias'                 => 'Alias',
     'balance'               => 'Balance',
     'reference'             => 'Reference',

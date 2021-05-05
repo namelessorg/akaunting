@@ -21,17 +21,13 @@
 
                 {{ Form::textGroup('email', trans('general.email'), 'envelope', []) }}
 
-                {{ Form::textGroup('tax_number', trans('general.tax_number'), 'percent', []) }}
+                {{-- Form::selectAddNewGroup('currency_code', trans_choice('general.currencies', 1), 'exchange-alt', $currencies, $customer->currency_code, ['required' => 'required', 'path' => route('modals.currencies.create'), 'field' => ['key' => 'code', 'value' => 'name']]) --}}
 
-                {{ Form::selectAddNewGroup('currency_code', trans_choice('general.currencies', 1), 'exchange-alt', $currencies, $customer->currency_code, ['required' => 'required', 'path' => route('modals.currencies.create'), 'field' => ['key' => 'code', 'value' => 'name']]) }}
+                {{ Form::numberGroup('telegram_chat_id', 'Telegram chat id', 'paper-plane', ['required' => 'required'], $customer->telegram_chat_id) }}
 
-                {{ Form::textGroup('phone', trans('general.phone'), 'phone', []) }}
-
-                {{ Form::textGroup('website', trans('general.website'), 'globe',[]) }}
+                {{ Form::textGroup('telegram_id', 'Telegram username', 'paper-plane', ['required' => 'required'], $customer->telegram_id) }}
 
                 {{ Form::textareaGroup('address', trans('general.address')) }}
-
-                {{ Form::textGroup('reference', trans('general.reference'), 'file', []) }}
 
                 {{ Form::radioGroup('enabled', trans('general.enabled'), $customer->enabled) }}
 

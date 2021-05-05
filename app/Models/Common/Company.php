@@ -17,6 +17,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Kyslik\ColumnSortable\Sortable;
 use Lorisleiva\LaravelSearchString\Concerns\SearchString;
 
+/**
+ * Class Company
+ *
+ * @package App\Models\Common
+ * @property bool $enabled
+ * @property int $id
+ * @property string $name
+ * @property string $telegram_observer_token
+ * @property int $telegram_channel_id
+ */
 class Company extends Eloquent
 {
     use Contacts, Media, SearchString, SoftDeletes, Sortable, Tenants, Transactions;

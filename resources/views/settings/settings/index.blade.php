@@ -8,7 +8,7 @@
             <div class="row">
                 @can('read-settings-company')
                     <div class="col-md-4">
-                        <a href="{{ route('settings.company.edit') }}">
+                        <a href="{{ route('companies.edit', $currentCompanyId) }}">
                             <button type="button" class="btn-icon-clipboard p-2">
                                 <div class="row mx-0">
                                     <div class="col-auto">

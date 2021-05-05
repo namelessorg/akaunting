@@ -14,7 +14,7 @@ return [
 
     'name' => env('APP_NAME', 'Akaunting'),
 
-    'installed' => env('APP_INSTALLED', false),
+    'installed' => env('APP_INSTALLED', true),
 
     'schedule_time' => env('APP_SCHEDULE_TIME', '9:00'),
 
@@ -182,6 +182,7 @@ return [
         App\Providers\Observer::class,
         App\Providers\Queue::class,
         App\Providers\Route::class,
+        App\Providers\Telegram::class,
         App\Providers\Validation::class,
         App\Providers\ViewComposer::class,
 

@@ -6,10 +6,14 @@ use App\Abstracts\Job;
 use App\Models\Auth\User;
 use App\Models\Auth\Role;
 use App\Models\Common\Contact;
+use App\Services\TelegramService;
 use Illuminate\Support\Str;
 
 class CreateContact extends Job
 {
+    /**
+     * @var Contact
+     */
     protected $contact;
 
     protected $request;
@@ -38,10 +42,26 @@ class CreateContact extends Job
 
             $this->contact = Contact::create($this->request->all());
 
+            $telegramService = app(TelegramService::class);
+            if ($this->contact->isCustomer() && $this->request->has('enabled')) {
+                if ($this->request->get('enabled', false)) {
+                    $telegramService->addUser(
+                        $this->contact,
+                        $this->contact->company
+                    );
+                    logger("Contact#{$this->contact->id} added to telegram group for company# `{$this->contact->company->name}` from admin update contact");
+                } else {
+                    // чтобы можно было кикнуть левых юзеров
+                    $telegramService->kick(
+                        $this->contact,
+                        $this->contact->company);
+                    logger("Contact#{$this->contact->id} kicked from telegram group for company# `{$this->contact->company->name}` from admin update contact");
+                }
+            }
             // Upload logo
             if ($this->request->file('logo')) {
                 $media = $this->getMedia($this->request->file('logo'), Str::plural($this->contact->type));
-    
+
                 $this->contact->attachMedia($media, 'logo');
             }
         });

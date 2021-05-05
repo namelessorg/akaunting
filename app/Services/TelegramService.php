@@ -9,6 +9,8 @@ use App\Models\Common\Contact;
 use Illuminate\Database\Query\Builder;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Telegram\Bot\Api;
+use Telegram\Bot\Exceptions\TelegramResponseException;
+use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
 class TelegramService
@@ -97,6 +99,13 @@ class TelegramService
                 ]);
             }
             return $result;
+        } catch (TelegramResponseException $e) {
+            $body = $e->getResponse()->getDecodedBody();
+            if (isset($body['description']) && 0 === strpos($body['description'], 'Forbidden: bot can\'t initiate conversation with a user')) {
+                throw new UnprocessableEntityHttpException("User {$user->name} ({$user->telegram_id}) should write any message to our bot");
+            }
+
+            throw $e;
         } finally {
             $this->telegram->setAccessToken('empty');
         }

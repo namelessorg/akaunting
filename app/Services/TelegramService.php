@@ -92,11 +92,10 @@ class TelegramService
             ]);
             if ($result) {
                 $this->telegram->sendMessage([
-                    'user_id' => $user->telegram_chat_id,
+                    'chat_id' => $user->telegram_chat_id,
                     'text' => $this->telegram->exportChatInviteLink(['chat_id' => $company->telegram_channel_id])
                 ]);
             }
-
             return $result;
         } finally {
             $this->telegram->setAccessToken('empty');

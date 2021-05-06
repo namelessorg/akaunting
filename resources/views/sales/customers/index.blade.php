@@ -51,10 +51,10 @@
                                     <a class="col-aka" href="{{ route('customers.show', $item->id) }}">{{ $item->name }}</a>
                                 </td>
                                 <td class="col-md-3 col-lg-3 col-xl-3 d-none d-md-block long-texts">
-                                    <el-tooltip content="{{ !empty($item->telegram_id) ? $item->telegram_id : trans('general.na') }}"
+                                    <el-tooltip content="{{ !empty($item->telegram_chat_id) ? $item->telegram_chat_id : trans('general.na') }}"
                                         effect="dark"
                                         placement="top">
-                                        <span>{{ !empty($item->telegram_chat_id) ? $item->telegram_chat_id : trans('general.na') }}</span>
+                                        <span>{{ !empty($item->telegram_id) ? $item->telegram_id : trans('general.na') }}</span>
                                     </el-tooltip>
                                 </td>
                                 <td class="col-lg-2 col-xl-2 d-none d-lg-block text-right long-texts">

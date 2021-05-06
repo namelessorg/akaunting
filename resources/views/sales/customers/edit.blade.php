@@ -27,7 +27,7 @@
 
                 {{ Form::textGroup('telegram_id', 'Telegram username', 'paper-plane', ['required' => 'required'], $customer->telegram_id) }}
 
-                {{ Form::textareaGroup('address', trans('general.address')) }}
+                {{ Form::textareaGroup('mt', 'Metatraders id', 'exchange-alt', $customer->mtString) }}
 
                 {{ Form::radioGroup('enabled', trans('general.enabled'), $customer->enabled) }}
 

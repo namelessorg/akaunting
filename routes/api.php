@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\Common\Contacts;
+use Dingo\Api\Routing\Router;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -11,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 $api = app('Dingo\Api\Routing\Router');
 
 $api->version('v3', ['middleware' => ['api']], function ($api) {
-    $api->group(['as' => 'api', 'namespace' => 'App\Http\Controllers\Api'], function ($api) {
+    $api->group(['as' => 'api', 'namespace' => 'App\Http\Controllers\Api'], function (Router $api) {
         // Companies
         $api->get('companies/{company}/owner', 'Common\Companies@canAccess')->name('.companies.owner');
         $api->get('companies/{company}/enable', 'Common\Companies@enable')->name('.companies.enable');
@@ -29,6 +31,7 @@ $api->version('v3', ['middleware' => ['api']], function ($api) {
         $api->resource('items', 'Common\Items');
 
         // Contacts
+        Route::get('contacts/{company}/list', [Contacts::class, 'list'])->name('public.contacts.list')->middleware('bindings');
         $api->get('contacts/{contact}/enable', 'Common\Contacts@enable')->name('.contacts.enable');
         $api->get('contacts/{contact}/disable', 'Common\Contacts@disable')->name('.contacts.disable');
         $api->resource('contacts', 'Common\Contacts');

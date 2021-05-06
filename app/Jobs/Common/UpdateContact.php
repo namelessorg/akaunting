@@ -57,17 +57,21 @@ class UpdateContact extends Job
 
             $telegramService = app(TelegramService::class);
             if ($this->contact->isCustomer() && $this->request->has('enabled')) {
-                if ($this->request->get('enabled', false)) {
-                    $telegramService->addUser(
-                        $this->contact,
-                        $this->contact->company
-                    );
-                    logger("Contact#{$this->contact->id} added to telegram group for company# `{$this->contact->company->name}` from admin update contact");
-                } else {
-                    $telegramService->kick(
-                        $this->contact,
-                        $this->contact->company);
-                    logger("Contact#{$this->contact->id} kicked from telegram group for company# `{$this->contact->company->name}` from admin update contact");
+                try {
+                    if ($this->request->get('enabled', false)) {
+                        $telegramService->addUser(
+                            $this->contact,
+                            $this->contact->company
+                        );
+                        logger("Contact#{$this->contact->id} added to telegram group for company# `{$this->contact->company->name}` from admin update contact");
+                    } else {
+                        $telegramService->kick(
+                            $this->contact,
+                            $this->contact->company);
+                        logger("Contact#{$this->contact->id} kicked from telegram group for company# `{$this->contact->company->name}` from admin update contact");
+                    }
+                } catch (\Throwable $e) {
+                    flash()->message($e->getMessage());
                 }
             }
         });

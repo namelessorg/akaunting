@@ -59,6 +59,8 @@ return [
 
     'asset_url' => env('ASSET_URL', null),
 
+    'log_all_database_queries' => env('DB_LOG_ALL_QUERIES', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

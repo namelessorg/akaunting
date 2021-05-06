@@ -11,6 +11,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Telegram\Bot\Api;
 use Telegram\Bot\Exceptions\TelegramResponseException;
 use Telegram\Bot\Exceptions\TelegramSDKException;
+use Telegram\Bot\Objects\Message;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
 class TelegramService
@@ -49,6 +50,7 @@ class TelegramService
 
     public function handleUpdate(Company $company, Api $telegram, UpdateObject $update): void
     {
+        $company->makeCurrent();
         switch ($update->detectType()) {
             case 'message':
                 $message = $update->getMessage();
@@ -60,28 +62,7 @@ class TelegramService
                 return;
         }
 
-        /** @var Contact $user */
-        $username = $message->from->username;
-        $user = $company->customers()->whereNested(function (Builder $builder) use ($message) {
-            if (strlen($message->from->username) > 1) {
-                $builder->orWhere('telegram_id', $message->from->username);
-            }
-            $builder->orWhere('telegram_chat_id', $message->from->id);
-        })->get();
-
-        if (null !== $user) {
-            if (empty($user->telegram_id)) {
-                $user->telegram_id = $username;
-            }
-            if (empty($user->telegram_chat_id)) {
-                $user->telegram_chat_id = $message->from->id;
-            }
-            if (!empty($message->from->firstName) || !empty($message->from->lastName)) {
-                $user->name = trim($message->from->firstName . ' ' . $message->from->lastName);
-            }
-
-            $user->save();
-        }
+        $contact = $this->refreshUserByUpdate($message, $company);
     }
 
     public function addUser(Contact $user, Company $company): bool
@@ -122,5 +103,38 @@ class TelegramService
         } finally {
             $this->telegram->setAccessToken('empty');
         }
+    }
+
+    protected function refreshUserByUpdate(Message $message, Company $company): Contact
+    {
+        /** @var Contact $user */
+        $username = $message->from->username;
+        $user = $company->customers()->whereNested(function (Builder $builder) use ($message) {
+            if (strlen($message->from->username) > 1) {
+                $builder->orWhere('telegram_id', $message->from->username);
+            }
+            $builder->orWhere('telegram_chat_id', $message->from->id);
+        })->get();
+
+        if (null === $user) {
+            $user = $company->customers()->newModelInstance([
+                'enabled' => 0,
+                'expired_at' => now(),
+            ]);
+        }
+
+        if (empty($user->telegram_id)) {
+            $user->telegram_id = $username;
+        }
+        if (empty($user->telegram_chat_id)) {
+            $user->telegram_chat_id = $message->from->id;
+        }
+        if (!empty($message->from->firstName) || !empty($message->from->lastName)) {
+            $user->name = trim($message->from->firstName . ' ' . $message->from->lastName);
+        }
+
+        $user->save();
+
+        return $user;
     }
 }

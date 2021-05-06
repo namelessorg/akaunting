@@ -24,6 +24,7 @@ use Illuminate\Notifications\Notifiable;
  * @property Company $company
  * @property string $telegram_id
  * @property string $name
+ * @property array $mt
  * @property int $telegram_chat_id
  */
 class Contact extends Model
@@ -37,7 +38,7 @@ class Contact extends Model
      *
      * @var array
      */
-    protected $fillable = ['company_id', 'type', 'name', 'email', 'user_id', 'tax_number', 'phone', 'address', 'website', 'currency_code', 'reference', 'enabled', 'expires_at', 'telegram_id', 'telegram_chat_id'];
+    protected $fillable = ['company_id', 'type', 'name', 'email', 'user_id', 'tax_number', 'phone', 'address', 'website', 'currency_code', 'reference', 'enabled', 'expires_at', 'telegram_id', 'telegram_chat_id', 'mt'];
 
     /**
      * The attributes that should be cast.
@@ -46,7 +47,8 @@ class Contact extends Model
      */
     protected $casts = [
         'enabled' => 'boolean',
-        'expires_at' => 'datetime'
+        'expires_at' => 'datetime',
+        'mt' => 'array'
     ];
 
     /**
@@ -85,12 +87,12 @@ class Contact extends Model
 
     public function expense_transactions()
     {
-        return $this->transactions()->whereIn('type', (array) $this->getExpenseTypes());
+        return $this->transactions()->whereIn('type', (array)$this->getExpenseTypes());
     }
 
     public function income_transactions()
     {
-        return $this->transactions()->whereIn('type', (array) $this->getIncomeTypes());
+        return $this->transactions()->whereIn('type', (array)$this->getIncomeTypes());
     }
 
     public function invoices()
@@ -112,7 +114,7 @@ class Contact extends Model
      * Scope to only include contacts of a given type.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param mixed $types
+     * @param mixed                                 $types
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeType($query, $types)
@@ -121,7 +123,7 @@ class Contact extends Model
             return $query;
         }
 
-        return $query->whereIn($this->table . '.type', (array) $types);
+        return $query->whereIn($this->table . '.type', (array)$types);
     }
 
     /**
@@ -132,7 +134,7 @@ class Contact extends Model
      */
     public function scopeVendor($query)
     {
-        return $query->whereIn($this->table . '.type', (array) $this->getVendorTypes());
+        return $query->whereIn($this->table . '.type', (array)$this->getVendorTypes());
     }
 
     /**
@@ -143,7 +145,7 @@ class Contact extends Model
      */
     public function scopeCustomer($query)
     {
-        return $query->whereIn($this->table . '.type', (array) $this->getCustomerTypes());
+        return $query->whereIn($this->table . '.type', (array)$this->getCustomerTypes());
     }
 
     public function scopeEmail($query, $email)
@@ -155,6 +157,16 @@ class Contact extends Model
     {
         $this->email = null;
         $this->user_id = null;
+    }
+
+    public function setMtAttribute($value)
+    {
+        $this->attributes['mt'] = $this->asJson(array_filter(array_unique(preg_split('/\D/', $value))));
+    }
+
+    public function getMtStringAttribute()
+    {
+        return implode(PHP_EOL, $this->fromJson($this->attributes['mt'] ?? '{}'));
     }
 
     /**

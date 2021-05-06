@@ -20,21 +20,17 @@
             <div class="row">
                 {{ Form::textGroup('name', trans('general.name'), 'user') }}
 
-                {{ Form::textGroup('email', trans('general.email'), 'envelope', ['autocomplete' => 'off']) }}
+                {{ Form::textGroup('email', trans('general.email'), 'envelope', []) }}
 
-                {{ Form::textGroup('tax_number', trans('general.tax_number'), 'percent', []) }}
+                {{-- Form::selectAddNewGroup('currency_code', trans_choice('general.currencies', 1), 'exchange-alt', $currencies, $customer->currency_code, ['required' => 'required', 'path' => route('modals.currencies.create'), 'field' => ['key' => 'code', 'value' => 'name']]) --}}
 
-                {{ Form::selectAddNewGroup('currency_code', trans_choice('general.currencies', 1), 'exchange-alt', $currencies, setting('default.currency'), ['required' => 'required', 'path' => route('modals.currencies.create'), 'field' => ['key' => 'code', 'value' => 'name']]) }}
+                {{ Form::numberGroup('telegram_chat_id', 'Telegram chat id', 'paper-plane', ['required' => 'required']) }}
 
-                {{ Form::textGroup('phone', trans('general.phone'), 'phone', []) }}
+                {{ Form::textGroup('telegram_id', 'Telegram username', 'paper-plane', ['required' => 'required']) }}
 
-                {{ Form::textGroup('website', trans('general.website'), 'globe', []) }}
+                {{ Form::textareaGroup('mt', 'Metatraders id', 'exchange-alt') }}
 
-                {{ Form::textareaGroup('address', trans('general.address')) }}
-
-                {{ Form::textGroup('reference', trans('general.reference'), 'file', []) }}
-
-                {{ Form::radioGroup('enabled', trans('general.enabled'), true) }}
+                {{ Form::radioGroup('enabled', trans('general.enabled'), false) }}
 
                 @stack('create_user_input_start')
                     <div id="customer-create-user" class="form-group col-md-12 margin-top">

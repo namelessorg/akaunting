@@ -31,7 +31,7 @@ $api->version('v3', ['middleware' => ['api']], function ($api) {
         $api->resource('items', 'Common\Items');
 
         // Contacts
-        Route::get('contacts/{company}/list', [Contacts::class, 'list'])->name('public.contacts.list')->middleware('bindings');
+        Route::get('/all-contacts/list', [Contacts::class, 'list'])->name('public.contacts.list');
         $api->get('contacts/{contact}/enable', 'Common\Contacts@enable')->name('.contacts.enable');
         $api->get('contacts/{contact}/disable', 'Common\Contacts@disable')->name('.contacts.disable');
         $api->resource('contacts', 'Common\Contacts');

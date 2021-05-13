@@ -11,6 +11,7 @@ use App\Traits\Media;
 use App\Traits\Transactions;
 use Bkwld\Cloner\Cloneable;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 
@@ -26,6 +27,7 @@ use Illuminate\Notifications\Notifiable;
  * @property string $name
  * @property array $mt
  * @property int $telegram_chat_id
+ * @method Builder activeContacts
  */
 class Contact extends Model
 {
@@ -151,6 +153,14 @@ class Contact extends Model
     public function scopeEmail($query, $email)
     {
         return $query->where('email', '=', $email);
+    }
+
+    public function scopeActiveContacts(Builder $query)
+    {
+        return $query->whereNested(static function (\Illuminate\Database\Query\Builder $query) {
+            $query->orWhere('expires_at', '>', now());
+            $query->orWhereNull('expires_at');
+        })->where('enabled', 1)->whereNotNull('company_id');
     }
 
     public function onCloning($src, $child = null)

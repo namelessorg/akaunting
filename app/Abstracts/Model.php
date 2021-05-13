@@ -6,9 +6,17 @@ use App\Traits\Tenants;
 use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder;
 use Kyslik\ColumnSortable\Sortable;
 use Lorisleiva\LaravelSearchString\Concerns\SearchString;
 
+/**
+ * Class Model
+ *
+ * @package App\Abstracts
+ * @method Builder enabled
+ * @method Builder allCompanies
+ */
 abstract class Model extends Eloquent
 {
     use Cachable, SearchString, SoftDeletes, Sortable, Tenants;

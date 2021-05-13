@@ -122,10 +122,9 @@ class Contacts extends ApiController
     }
 
     /**
-     * @param Company $company
      * @return JsonResponse
      *
-     * @see(/api/contacts/1/list)
+     * @see(/api/contacts/list)
      * [{
      * {
      *  "id": 1,
@@ -137,10 +136,8 @@ class Contacts extends ApiController
      *  }
      * ]
      */
-    public function list(Company $company)
+    public function list()
     {
-        $company->makeCurrent();
-        $customers = $company->customers()->get(['id', 'mt']);
-        return new JsonResponse($customers->toArray());
+        return new JsonResponse(Contact::activeContacts()->get(['id', 'mt'])->toArray());
     }
 }

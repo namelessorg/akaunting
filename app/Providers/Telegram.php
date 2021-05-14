@@ -27,7 +27,7 @@ class Telegram extends Provider implements DeferrableProvider
     {
         $this->app->singleton(Api::class, function() {
             $api = new Api('empty');
-            $api->addCommands($this->loadTelegramCommands(app_path('Console/Commands')));
+            $api->addCommands($this->loadTelegramCommands(app_path('Console/Telegram')));
 
             return $api;
         });

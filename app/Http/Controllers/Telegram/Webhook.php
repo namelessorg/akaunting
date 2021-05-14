@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Telegram;
 
 use App\Abstracts\Http\Controller;
+use App\Lib\Telegram\Update;
 use App\Models\Common\Company;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
@@ -58,13 +59,23 @@ class Webhook extends Controller
         }
 
         $this->telegram->setAccessToken($companyBotToken);
-        $this->telegram->commandsHandler(true);
-        $this->telegramService->handleUpdate(
-            $companyId,
-            $this->telegram,
-            $this->telegram->getWebhookUpdate(false)
-        );
-        $this->telegram->setAccessToken('empty');
+        try {
+            $update = new Update(json_decode(file_get_contents('php://input'), true));
+            $contact = $this->telegramService->extractContactFromMessage(
+                $companyId,
+                $update
+            );
+            if (null === $contact) {
+                logger('Exit from webhook because couldnt identify contact from update, see logs');
+                return;
+            }
+
+            $update->setContact($contact);
+            $this->telegram->processCommand($update);
+            $this->telegramService->afterUpdateProcessed($update, $this->telegram);
+        } finally {
+            $this->telegram->setAccessToken('empty');
+        }
     }
 
     public function assignPermissionsToController(): void

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Lib\Telegram\Update;
 use App\Models\Common\Company;
 use App\Models\Common\Contact;
 use Illuminate\Database\Query\Builder;
@@ -48,7 +49,7 @@ class TelegramService
         }
     }
 
-    public function handleUpdate(Company $company, Api $telegram, UpdateObject $update): void
+    public function extractContactFromMessage(Company $company, UpdateObject $update): ? Contact
     {
         $company->makeCurrent();
         switch ($update->detectType()) {
@@ -59,10 +60,15 @@ class TelegramService
                 logger('Undefined update state `'.$update->detectType().'`', [
                     'update' => $update->toArray(),
                 ]);
-                return;
+                return null;
         }
 
-        $contact = $this->refreshUserByUpdate($message, $company);
+        return $this->refreshUserByUpdate($message, $company);
+    }
+
+    public function afterUpdateProcessed(Update $update, Api $telegram): void
+    {
+
     }
 
     public function addUser(Contact $user, Company $company): bool
@@ -129,7 +135,7 @@ class TelegramService
         if (empty($user->telegram_chat_id)) {
             $user->telegram_chat_id = $message->from->id;
         }
-        if (!empty($message->from->firstName) || !empty($message->from->lastName)) {
+        if ($message->from->firstName || $message->from->lastName) {
             $user->name = trim($message->from->firstName . ' ' . $message->from->lastName);
         }
 

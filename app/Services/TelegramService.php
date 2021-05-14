@@ -114,7 +114,7 @@ class TelegramService
                 $builder->orWhere('telegram_id', $message->from->username);
             }
             $builder->orWhere('telegram_chat_id', $message->from->id);
-        })->get();
+        })->first();
 
         if (null === $user) {
             $user = $company->customers()->newModelInstance([

@@ -60,7 +60,7 @@ class AddAdminItems
                 }
 
                 if ($user->can('read-sales-revenues')) {
-                    $sub->route('revenues.index', trans_choice('general.revenues', 2), [], 20, $attr);
+                    //$sub->route('revenues.index', trans_choice('general.revenues', 2), [], 20, $attr);
                 }
 
                 if ($user->can('read-sales-customers')) {
@@ -129,7 +129,7 @@ class AddAdminItems
 
         // Apps
         if ($user->can('read-modules-home')) {
-            $menu->route('apps.home.index', trans_choice('general.modules', 2), [], 80, ['icon' => 'fa fa-rocket']);
+            //$menu->route('apps.home.index', trans_choice('general.modules', 2), [], 80, ['icon' => 'fa fa-rocket']);
         }
     }
 }

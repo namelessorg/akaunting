@@ -26,7 +26,7 @@ class StartTelegramCommand extends AbstractTelegramCommand
         if ($expired) {
             $message .= "You have no subscription now.\r\n";
         } else {
-            $message .= "You subscription will expired: " . now()->diffForHumans($contact->expires_at) . "\r\n";
+            $message .= "You subscription will expired: " . $contact->expires_at->diffForHumans(now()) . "\r\n";
         }
 
         $keyboard = [];

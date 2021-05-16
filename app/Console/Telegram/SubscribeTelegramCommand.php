@@ -18,7 +18,7 @@ class SubscribeTelegramCommand extends AbstractTelegramCommand
 {
     use Jobs, Documents;
 
-    protected const INVOICES_PER_DAY_LIMIT = 100;
+    protected const INVOICES_PER_DAY_LIMIT = 10;
 
     /**
      * @var string Command Name

@@ -93,6 +93,9 @@ abstract class DocumentShow extends Base
     public $routeButtonEmail;
 
     /** @var string */
+    public $routeButtonTelegram;
+
+    /** @var string */
     public $routeButtonPaid;
 
     /** @var string */
@@ -250,6 +253,9 @@ abstract class DocumentShow extends Base
 
     /** @var string */
     public $textTimelineSendStatusMail;
+
+    /** @var string */
+    public $textTimelineSendStatusTelegram;
 
     /** @var string */
     public $textTimelineSentStatusMarkSent;
@@ -477,6 +483,7 @@ abstract class DocumentShow extends Base
         $this->textTimelineSentStatusMarkSent = $this->getTextTimelineSentStatusMarkSent($type, $textTimelineSentStatusMarkSent);
         $this->textTimelineSentStatusReceived = $this->getTextTimelineSentStatusReceived($type, $textTimelineSentStatusReceived);
         $this->textTimelineSendStatusMail = $this->getTextTimelineSendStatusMail($type, $textTimelineSendStatusMail);
+        $this->textTimelineSendStatusTelegram = 'invoices.send_telegram';
         $this->textTimelineGetPaidTitle = $this->getTextTimelineGetPaidTitle($type, $textTimelineGetPaidTitle);
         $this->textTimelineGetPaidStatusAwait = $this->getTextTimelineGetPaidStatusAwait($type, $textTimelineGetPaidStatusAwait);
         $this->textTimelineGetPaidStatusPartiallyPaid = $this->getTextTimelineGetPaidStatusPartiallyPaid($type, $textTimelineGetPaidStatusPartiallyPaid);
@@ -486,6 +493,7 @@ abstract class DocumentShow extends Base
         $this->routeButtonSent = $this->getRouteButtonSent($type, $routeButtonSent);
         $this->routeButtonReceived = $this->getRouteButtonReceived($type, $routeButtonReceived);
         $this->routeButtonEmail = $this->getRouteButtonEmail($type, $routeButtonEmail);
+        $this->routeButtonTelegram = $this->getRouteButtonTelegram();
 
         $this->hideCompanyDetails = $hideCompanyDetails;
         $this->hideCompanyLogo = $hideCompanyLogo;
@@ -919,6 +927,11 @@ abstract class DocumentShow extends Base
         }
 
         return 'invoices.email';
+    }
+
+    protected function getRouteButtonTelegram()
+    {
+        return 'invoices.telegram';
     }
 
     protected function getPermissionCreate($type, $permissionCreate)

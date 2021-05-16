@@ -57,6 +57,15 @@ abstract class Notification extends BaseNotification implements ShouldQueue
         return $this->replaceTags($this->template->body);
     }
 
+    public function getTelegramBody()
+    {
+        $rawBody = $this->replaceTags($this->template->body);
+        $bodyWithoutP = str_replace('<p>&nbsp;</p>', "\r\n\r\n", $rawBody);
+        $bodyWithoutBr = preg_replace('/<br\s?\/?>/i', "\r\n", $bodyWithoutP);
+        $bodyWithoutStrong = preg_replace("#<strong>(.*?)</strong>#", "<b>$1</b>", $bodyWithoutBr);
+        return html_entity_decode(strip_tags($bodyWithoutStrong, '<b><i><u><code><pre><a>'));
+    }
+
     public function replaceTags($content)
     {
         $pattern = $this->getTagsPattern();

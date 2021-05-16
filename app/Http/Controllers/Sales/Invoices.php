@@ -11,8 +11,10 @@ use App\Jobs\Document\CreateDocument;
 use App\Jobs\Document\DeleteDocument;
 use App\Jobs\Document\DuplicateDocument;
 use App\Jobs\Document\UpdateDocument;
+use App\Models\Common\Contact;
 use App\Models\Document\Document;
 use App\Notifications\Sale\Invoice as Notification;
+use App\Services\TelegramService;
 use App\Traits\Documents;
 
 class Invoices extends Controller
@@ -273,6 +275,31 @@ class Invoices extends Controller
         event(new \App\Events\Document\DocumentSent($invoice));
 
         flash(trans('documents.messages.email_sent', ['type' => trans_choice('general.invoices', 1)]))->success();
+
+        return redirect()->back();
+    }
+
+    /**
+     * Sent to telegram
+     *
+     * @param  Document $invoice
+     *
+     * @return Response
+     */
+    public function telegramInvoice(Document $invoice)
+    {
+        $contact = $invoice->contact;
+        if (!$contact instanceof Contact || !$contact->telegram_chat_id) {
+            flash()->error('User has no telegram chat id');
+            return redirect()->back();
+        }
+
+        $telegramService = app(TelegramService::class);
+        $telegramService->sendInvoice($invoice, $invoice->contact);
+
+        event(new \App\Events\Document\DocumentSent($invoice));
+
+        flash(trans('documents.messages.tg_sent', ['type' => trans_choice('general.invoices', 1)]))->success();
 
         return redirect()->back();
     }

@@ -44,6 +44,7 @@ return [
 
     'messages' => [
         'email_sent'        => ':type email has been sent!',
+        'tg_sent'           => ':type telegram has been sent!',
         'marked_as'         => ':type marked as :status!',
         'marked_sent'       => ':type marked as sent!',
         'marked_paid'       => ':type marked as paid!',

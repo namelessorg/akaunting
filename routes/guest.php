@@ -22,5 +22,5 @@ Route::group(['prefix' => 'auth'], function () {
 });
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect('http://google.com');
 });

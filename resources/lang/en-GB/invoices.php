@@ -34,6 +34,7 @@ return [
     'mark_cancelled'        => 'Mark Cancelled',
     'download_pdf'          => 'Download PDF',
     'send_mail'             => 'Send Email',
+    'send_telegram'         => 'Send Telegram',
     'all_invoices'          => 'Login to view all invoices',
     'create_invoice'        => 'Create Invoice',
     'send_invoice'          => 'Send Invoice',

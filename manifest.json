@@ -1,6 +1,6 @@
 {
-    "name": "Akaunting",
-    "short_name": "Akaunting",
+    "name": "Secure payments",
+    "short_name": "SP",
     "start_url": ".?utm_source=pwa",
     "display": "standalone",
     "theme_color": "#FFFFFF",

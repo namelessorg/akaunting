@@ -12,6 +12,7 @@ use App\Traits\Documents;
 use App\Traits\Uploads;
 use App\Utilities\Modules;
 use Illuminate\Support\Facades\URL;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Invoices extends Controller
 {
@@ -94,6 +95,15 @@ class Invoices extends Controller
         $file_name = 'invoice_' . time() . '.pdf';
 
         return $pdf->download($file_name);
+    }
+
+    protected function getInvoiceByHash(?string $invoice): Document
+    {
+        if (null === $invoice) {
+            throw new NotFoundHttpException();
+        }
+
+        return Document::query()->where(\DB::raw('MD5(concat(id, \''.Document::SALT.'\'))'), $invoice)->firstOrFail();
     }
 
     protected function prepareInvoice(Document $invoice)

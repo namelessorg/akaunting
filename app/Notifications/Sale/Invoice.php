@@ -4,6 +4,7 @@ namespace App\Notifications\Sale;
 
 use App\Abstracts\Notification;
 use App\Models\Common\EmailTemplate;
+use App\Models\Document\Document;
 use App\Traits\Documents;
 use Illuminate\Support\Facades\URL;
 
@@ -14,7 +15,7 @@ class Invoice extends Notification
     /**
      * The invoice model.
      *
-     * @var object
+     * @var object|Document
      */
     public $invoice;
 
@@ -108,9 +109,9 @@ class Invoice extends Notification
             money($this->invoice->amount, $this->invoice->currency_code, true),
             money($this->invoice->amount_due, $this->invoice->currency_code, true),
             company_date($this->invoice->due_at),
-            URL::signedRoute('signed.invoices.show', [$this->invoice->id]),
-            route('invoices.show', $this->invoice->id),
-            route('portal.invoices.show', $this->invoice->id),
+            $this->getSignedUrl(),
+            route('invoices.show', ['invoice' => $this->invoice->id, 'company_id' => $this->invoice->company->id]),
+            route('portal.invoices.show', ['invoice' => $this->invoice->id, 'company_id' => $this->invoice->company->id]),
             $this->invoice->contact_name,
             $this->invoice->company->name,
             $this->invoice->company->email,
@@ -118,5 +119,38 @@ class Invoice extends Notification
             $this->invoice->company->phone,
             nl2br(trim($this->invoice->company->address)),
         ];
+    }
+
+    protected function getSignedUrl()
+    {
+        $type = $this->invoice->type;
+        $page = config('type.' . $type . '.route.prefix');
+        $alias = config('type.' . $type . '.alias');
+
+        $route = '';
+
+        if (!empty($alias)) {
+            $route .= $alias . '.';
+        }
+
+        $route .= 'signed.' . $page . '.show';
+
+        try {
+            route($route, ['invoice' => $this->invoice->id, 'company_id' => company_id()]);
+
+            $signedUrl = URL::signedRoute(
+                $route,
+                ['invoice' => $this->invoice->id, 'company_id' => $this->invoice->company->id],
+                $this->invoice->due_at
+            );
+        } catch (\Exception $e) {
+            $signedUrl = URL::signedRoute(
+                'signed.invoices.show',
+                ['invoice' => $this->invoice->id, 'company_id' => $this->invoice->company->id],
+                $this->invoice->due_at
+            );
+        }
+
+        return $signedUrl;
     }
 }

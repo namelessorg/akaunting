@@ -6,7 +6,14 @@ use App\Abstracts\Model;
 use App\Models\Document\Document;
 use App\Traits\Transactions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
+/**
+ * Class Category
+ *
+ * @package App\Models\Setting
+ * @property int $id
+ */
 class Category extends Model
 {
     use HasFactory, Transactions;
@@ -35,6 +42,30 @@ class Category extends Model
      * @var array
      */
     public $sortable = ['name', 'type', 'enabled'];
+
+    public static function getTypeAndArgumentByCategoryName(string $name): ?array
+    {
+        preg_match('/\[([^\]]+)\] (.*)/', $name, $commandAndArgument);
+        if (empty($commandAndArgument[1])) {
+            return null;
+        }
+
+        $command = trim($commandAndArgument[1]);
+        $argument = $commandAndArgument[2] ?? null;
+        switch ($command) {
+            case 'user':
+                try {
+                    $dt = (new \DateTimeImmutable())->modify($argument);
+                } catch (\Throwable $e) {
+                    logger('Invalid to craft an argument for user category buff: ' . $e->getMessage());
+                    throw new BadRequestException('Invalid datetime period in argument');
+                }
+
+                return ['user', $dt];
+            default:
+                throw new BadRequestException("Unknown category magic command: `{$command}`");
+        }
+    }
 
     public function documents()
     {

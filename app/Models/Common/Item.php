@@ -4,11 +4,21 @@ namespace App\Models\Common;
 
 use App\Abstracts\Model;
 use App\Models\Document\Document;
+use App\Models\Setting\Category;
 use App\Traits\Currencies;
 use App\Traits\Media;
 use Bkwld\Cloner\Cloneable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * Class Item
+ *
+ * @package App\Models\Common
+ * @property int $id
+ * @property string $name
+ * @property bool $enabled
+ * @property-read Category $category
+ */
 class Item extends Model
 {
     use Cloneable, Currencies, HasFactory, Media;

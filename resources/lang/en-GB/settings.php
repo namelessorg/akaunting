@@ -122,7 +122,7 @@ return [
     'scheduling' => [
         'name'              => 'Scheduling',
         'description'       => 'Automatic reminders and command for recurring',
-        'send_invoice'      => 'Send Invoice Reminder',
+        'send_invoice'      => 'Send Expiration Reminder',
         'invoice_days'      => 'Send After Due Days',
         'send_bill'         => 'Send Bill Reminder',
         'bill_days'         => 'Send Before Due Days',

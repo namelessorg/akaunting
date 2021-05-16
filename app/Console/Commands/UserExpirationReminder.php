@@ -51,7 +51,7 @@ class UserExpirationReminder extends Command
                 continue;
             }
 
-            $days = preg_split('/\D/', setting('schedule.invoice_days', 1));
+            $days = preg_split('/\D/', setting('schedule.bill_days', 1));
             $customers = $company
                 ->customers()
                 ->where('enabled', true)
@@ -71,9 +71,11 @@ class UserExpirationReminder extends Command
                 try {
                     $message = $telegram->sendMessage([
                         'chat_id' => $customer->telegram_chat_id,
-                        'text' => now()->diffForHumans($customer->expires_at).' expiration, need to pay the subscription for renew access',
+                        'text' => now()->diffForHumans($customer->expires_at)." expiration in channel <b>{$company->name}</b>, need to pay the subscription for renew access.\r\n\r\nJust send me /start",
+                        'parse_mode' => 'HTML'
                     ]);
                 } catch (\Throwable $e) {}
+
                 logger('Sent expiration message', [
                     'message' => $message ? $message->toArray() : null,
                     'exception' => $e,

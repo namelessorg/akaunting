@@ -3,6 +3,11 @@
 namespace App\Http\Requests\Setting;
 
 use App\Abstracts\Http\FormRequest;
+use App\Models\Setting\Category as CategoryModel;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Validator;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Category extends FormRequest
 {
@@ -24,7 +29,13 @@ class Category extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string',
+            'name' => ['required', 'string', function (string $name, string $value) {
+                try {
+                    CategoryModel::getTypeAndArgumentByCategoryName($value);
+                } catch (BadRequestException $e) {
+                    throw new BadRequestHttpException($e->getMessage());
+                }
+            }],
             'type' => 'required|string',
             'color' => 'required|string',
         ];

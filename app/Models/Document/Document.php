@@ -3,6 +3,8 @@
 namespace App\Models\Document;
 
 use App\Abstracts\Model;
+use App\Models\Common\Company;
+use App\Models\Common\Contact;
 use App\Models\Common\Media as MediaModel;
 use App\Models\Setting\Tax;
 use App\Scopes\Document as Scope;
@@ -16,13 +18,26 @@ use Database\Factories\Document as DocumentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Carbon;
 
+/**
+ * Class Document
+ *
+ * @package App\Models\Document
+ * @property int $id
+ * @property Carbon $due_at
+ * @property string $type
+ * @property-read Contact $contact
+ * @property-read Company $company
+ * @method static notPaid
+ */
 class Document extends Model
 {
     use HasFactory, Documents, Cloneable, Currencies, DateTime, Media, Recurring;
 
     public const INVOICE_TYPE = 'invoice';
     public const BILL_TYPE = 'bill';
+    public const SALT = 'ef4533b0-b4cc-11eb-ba2f-0800200c9a66';
 
     protected $table = 'documents';
 
@@ -292,7 +307,9 @@ class Document extends Model
             $reconciled = 1;
         }
 
-        $this->setAttribute('reconciled', $reconciled);
+        if ($reconciled) {
+            $this->setAttribute('reconciled', $reconciled);
+        }
 
         return round($paid, $precision);
     }

@@ -34,7 +34,7 @@ class Item extends FormRequest
             'sale_price' => 'required',
             'purchase_price' => 'required',
             'tax_ids' => 'nullable|array',
-            'category_id' => 'nullable|integer',
+            'category_id' => 'required|integer',
             'enabled' => 'integer|boolean',
             'picture' => $picture,
         ];

@@ -72,6 +72,7 @@ Route::group(['prefix' => 'sales'], function () {
     Route::get('invoices/{invoice}/sent', 'Sales\Invoices@markSent')->name('invoices.sent');
     Route::get('invoices/{invoice}/cancelled', 'Sales\Invoices@markCancelled')->name('invoices.cancelled');
     Route::get('invoices/{invoice}/email', 'Sales\Invoices@emailInvoice')->name('invoices.email');
+    Route::get('invoices/{invoice}/telegram', 'Sales\Invoices@telegramInvoice')->name('invoices.telegram');
     Route::get('invoices/{invoice}/paid', 'Sales\Invoices@markPaid')->name('invoices.paid');
     Route::get('invoices/{invoice}/print', 'Sales\Invoices@printInvoice')->name('invoices.print');
     Route::get('invoices/{invoice}/pdf', 'Sales\Invoices@pdfInvoice')->name('invoices.pdf');

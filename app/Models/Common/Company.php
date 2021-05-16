@@ -26,6 +26,7 @@ use Lorisleiva\LaravelSearchString\Concerns\SearchString;
  * @property string $name
  * @property string $telegram_observer_token
  * @property int $telegram_channel_id
+ * @property Item[] $items
  */
 class Company extends Eloquent
 {

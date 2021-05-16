@@ -3,9 +3,13 @@
 namespace App\Events\Document;
 
 use App\Abstracts\Event;
+use App\Models\Document\Document;
 
 class DocumentSent extends Event
 {
+    /**
+     * @var Document
+     */
     public $document;
 
     /**

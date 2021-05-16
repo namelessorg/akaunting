@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\Document\ProlongUserExpiration;
 use App\Listeners\Telegram\UpdateWasReceivedListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as Provider;
 use Telegram\Bot\Events\UpdateWasReceived;
@@ -57,11 +58,12 @@ class Event extends Provider
             'App\Listeners\Document\SendDocumentRecurringNotification',
         ],
         'App\Events\Document\DocumentReminded' => [
-            'App\Listeners\Document\SendDocumentReminderNotification',
+            //'App\Listeners\Document\SendDocumentReminderNotification',
         ],
         'App\Events\Document\PaymentReceived' => [
             'App\Listeners\Document\CreateDocumentTransaction',
-            'App\Listeners\Document\SendDocumentPaymentNotification',
+            //'App\Listeners\Document\SendDocumentPaymentNotification',
+            ProlongUserExpiration::class,
         ],
         'App\Events\Document\DocumentSent' => [
             'App\Listeners\Document\MarkDocumentSent',

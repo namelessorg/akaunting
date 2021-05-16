@@ -7,12 +7,12 @@ namespace App\Services;
 use App\Lib\Telegram\Update;
 use App\Models\Common\Company;
 use App\Models\Common\Contact;
+use App\Models\Document\Document;
+use App\Notifications\Sale\Invoice as Notification;
 use Illuminate\Database\Query\Builder;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Telegram\Bot\Api;
 use Telegram\Bot\Exceptions\TelegramResponseException;
-use Telegram\Bot\Exceptions\TelegramSDKException;
-use Telegram\Bot\Objects\Message;
 use Telegram\Bot\Objects\Update as UpdateObject;
 
 class TelegramService
@@ -49,12 +49,23 @@ class TelegramService
         }
     }
 
-    public function extractContactFromMessage(Company $company, UpdateObject $update): ? Contact
+    public function extractContactFromMessage(Company $company, UpdateObject $update): ?Contact
     {
         $company->makeCurrent();
         switch ($update->detectType()) {
+            case 'callback_query':
+                $message = $update->callbackQuery;
+                $id = $message->from->id;
+                $username = $message->from->username;
+                $firstName = $message->from->firstName;
+                $lastName = $message->from->lastName;
+                break;
             case 'message':
                 $message = $update->getMessage();
+                $id = $message->from->id;
+                $username = $message->from->username;
+                $firstName = $message->from->firstName;
+                $lastName = $message->from->lastName;
                 break;
             default:
                 logger('Undefined update state `'.$update->detectType().'`', [
@@ -63,12 +74,35 @@ class TelegramService
                 return null;
         }
 
-        return $this->refreshUserByUpdate($message, $company);
+        return $this->refreshUserByUpdate($company, $id, $username, $firstName, $lastName);
     }
 
     public function afterUpdateProcessed(Update $update, Api $telegram): void
     {
+        if ($update->isProcessed()) {
+            return;
+        }
 
+        $contact = $update->getContact();
+        if (isset($contact->last_command['name'])) {
+            $telegram->triggerCommand($contact->last_command['name'], $update, $contact->last_command['entity'] ?? []);
+        } elseif ($update->callbackQuery->data && is_scalar($update->callbackQuery->data)) {
+            $telegram->triggerCommand(explode(' ', ltrim($update->callbackQuery->data, '/'))[0] ?? '', $update);
+        }
+    }
+
+    public function sendInvoice(Document $document, Contact $user): void
+    {
+        $this->telegram->setAccessToken($document->company->telegram_observer_token);
+        try {
+            $this->telegram->sendMessage([
+                'chat_id' => $user->telegram_chat_id,
+                'text' => (new Notification($document, 'invoice_new_customer', false))->getTelegramBody(),
+                'parse_mode' => 'HTML'
+            ]);
+        } finally {
+            $this->telegram->setAccessToken('empty');
+        }
     }
 
     public function addUser(Contact $user, Company $company): bool
@@ -111,21 +145,21 @@ class TelegramService
         }
     }
 
-    protected function refreshUserByUpdate(Message $message, Company $company): Contact
+    protected function refreshUserByUpdate(Company $company, int $id, ?string $username, ?string $firstName, ?string $lastName): Contact
     {
         /** @var Contact $user */
-        $username = $message->from->username;
-        $user = $company->customers()->whereNested(function (Builder $builder) use ($message) {
-            if (strlen($message->from->username) > 1) {
-                $builder->orWhere('telegram_id', $message->from->username);
+        $user = $company->customers()->whereNested(function (Builder $builder) use ($id, $username) {
+            if (strlen($username) > 1) {
+                $builder->orWhere('telegram_id', $username);
             }
-            $builder->orWhere('telegram_chat_id', $message->from->id);
+            $builder->orWhere('telegram_chat_id', $id);
         })->first();
 
         if (null === $user) {
             $user = $company->customers()->newModelInstance([
                 'enabled' => 0,
                 'expired_at' => now(),
+                'company_id' => $company->id,
             ]);
         }
 
@@ -133,10 +167,10 @@ class TelegramService
             $user->telegram_id = $username;
         }
         if (empty($user->telegram_chat_id)) {
-            $user->telegram_chat_id = $message->from->id;
+            $user->telegram_chat_id = $id;
         }
-        if ($message->from->firstName || $message->from->lastName) {
-            $user->name = trim($message->from->firstName . ' ' . $message->from->lastName);
+        if ($firstName || $lastName) {
+            $user->name = trim($firstName . ' ' . $lastName);
         }
 
         $user->save();

@@ -26,6 +26,7 @@ use Illuminate\Notifications\Notifiable;
  * @property string $telegram_id
  * @property string $name
  * @property array $mt
+ * @property array $last_command
  * @property int $telegram_chat_id
  * @method Builder activeContacts
  */
@@ -40,7 +41,7 @@ class Contact extends Model
      *
      * @var array
      */
-    protected $fillable = ['company_id', 'type', 'name', 'email', 'user_id', 'tax_number', 'phone', 'address', 'website', 'currency_code', 'reference', 'enabled', 'expires_at', 'telegram_id', 'telegram_chat_id', 'mt'];
+    protected $fillable = ['company_id', 'type', 'name', 'email', 'user_id', 'tax_number', 'phone', 'address', 'website', 'currency_code', 'reference', 'enabled', 'expires_at', 'telegram_id', 'telegram_chat_id', 'mt', 'last_command'];
 
     /**
      * The attributes that should be cast.
@@ -50,7 +51,8 @@ class Contact extends Model
     protected $casts = [
         'enabled' => 'boolean',
         'expires_at' => 'datetime',
-        'mt' => 'array'
+        'mt' => 'array',
+        'last_command' => 'array'
     ];
 
     /**

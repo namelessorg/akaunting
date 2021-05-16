@@ -122,21 +122,13 @@
                                     <div class="mt-3">
                                     @endif
 
-                                    @stack('timeline_sent_body_button_email_start')
-                                        @if (!$hideButtonEmail)
-                                            @if($document->contact_email)
-                                                <a href="{{ route($routeButtonEmail, $document->id) }}" class="btn btn-danger btn-sm header-button-top">
-                                                    {{ trans($textTimelineSendStatusMail) }}
-                                                </a>
-                                            @else
-                                                <el-tooltip content="{{ trans('invoices.messages.email_required') }}" placement="top">
-                                                    <button type="button" class="btn btn-danger btn-sm btn-tooltip disabled header-button-top">
-                                                        {{ trans($textTimelineSendStatusMail) }}
-                                                    </button>
-                                                </el-tooltip>
-                                            @endif
-                                        @endif
-                                    @stack('timeline_sent_body_button_email_end')
+                                    @stack('timeline_sent_body_button_telegram_start')
+                                    @if (!$hideButtonEmail)
+                                        <a href="{{ route($routeButtonTelegram, $document->id) }}" class="btn btn-danger btn-sm header-button-top">
+                                            {{ trans($textTimelineSendStatusTelegram) }}
+                                        </a>
+                                    @endif
+                                    @stack('timeline_sent_body_button_telegram_end')
 
                                     @stack('timeline_sent_body_button_share_start')
                                         @if (!$hideButtonShare)

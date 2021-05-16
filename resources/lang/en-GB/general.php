@@ -11,6 +11,7 @@ return [
     'expenses'              => 'Expense|Expenses',
     'bills'                 => 'Bill|Bills',
     'payments'              => 'Payment|Payments',
+    'pay'                   => 'Pay',
     'vendors'               => 'Vendor|Vendors',
     'accounts'              => 'Account|Accounts',
     'transfers'             => 'Transfer|Transfers',

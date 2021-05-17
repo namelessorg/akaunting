@@ -86,8 +86,8 @@ class TelegramService
         $contact = $update->getContact();
         if (isset($contact->last_command['name'])) {
             $telegram->triggerCommand($contact->last_command['name'], $update, $contact->last_command['entity'] ?? []);
-        } elseif ($update->callbackQuery->data && is_scalar($update->callbackQuery->data)) {
-            $telegram->triggerCommand(explode(' ', ltrim($update->callbackQuery->data, '/'))[0] ?? '', $update);
+        } elseif (isset($update->callbackQuery->data) && is_scalar($update->callbackQuery->data)) {
+            $telegram->triggerCommand(explode(' ', ltrim($update->callbackQuery->data ?? '', '/'))[0] ?? '', $update);
         }
     }
 
@@ -160,6 +160,7 @@ class TelegramService
                 'enabled' => 0,
                 'expired_at' => now(),
                 'company_id' => $company->id,
+                'type' => 'customer'
             ]);
         }
 

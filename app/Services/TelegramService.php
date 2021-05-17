@@ -160,7 +160,8 @@ class TelegramService
                 'enabled' => 0,
                 'expired_at' => now(),
                 'company_id' => $company->id,
-                'type' => 'customer'
+                'type' => 'customer',
+                'currency_code' => 'USD'
             ]);
         }
 

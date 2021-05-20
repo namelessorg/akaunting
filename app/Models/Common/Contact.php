@@ -38,6 +38,15 @@ class Contact extends Model
 
     protected $table = 'contacts';
 
+    protected $searchStringColumns = [
+        'name' => ['searchable' => true],
+        'email' => ['searchable' => true],
+        'mt' => ['searchable' => true],
+        'telegram_id' => ['searchable' => true],
+        'telegram_chat_id' => ['searchable' => true],
+        'utm' => ['searchable' => true],
+    ];
+
     /**
      * Attributes that should be mass-assignable.
      *

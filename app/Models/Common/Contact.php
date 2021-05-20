@@ -26,6 +26,7 @@ use Illuminate\Notifications\Notifiable;
  * @property string $telegram_id
  * @property string $name
  * @property string $currency_code
+ * @property string $utm
  * @property array $mt
  * @property array $last_command
  * @property int $telegram_chat_id
@@ -42,7 +43,7 @@ class Contact extends Model
      *
      * @var array
      */
-    protected $fillable = ['company_id', 'type', 'name', 'email', 'user_id', 'tax_number', 'phone', 'address', 'website', 'currency_code', 'reference', 'enabled', 'expires_at', 'telegram_id', 'telegram_chat_id', 'mt', 'last_command'];
+    protected $fillable = ['company_id', 'type', 'name', 'email', 'user_id', 'tax_number', 'phone', 'address', 'website', 'currency_code', 'reference', 'enabled', 'expires_at', 'telegram_id', 'telegram_chat_id', 'mt', 'last_command', 'utm'];
 
     /**
      * The attributes that should be cast.
@@ -140,6 +141,18 @@ class Contact extends Model
     public function scopeVendor($query)
     {
         return $query->whereIn($this->table . '.type', (array)$this->getVendorTypes());
+    }
+
+    /**
+     * Scope to include only utm.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed $utm
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeUtm($query, $utm)
+    {
+        return $query->where($this->table . '.utm', $utm);
     }
 
     /**

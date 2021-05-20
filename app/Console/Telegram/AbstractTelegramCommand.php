@@ -30,6 +30,7 @@ abstract class AbstractTelegramCommand extends Command
             $this->run();
         } catch (\Throwable $e) {
             app(LoggerInterface::class)->error($e->getMessage(), ['e' => $e,]);
+            throw $e;
         }
     }
 

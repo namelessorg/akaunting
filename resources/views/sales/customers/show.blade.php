@@ -29,33 +29,26 @@
                 </li>
                 @stack('customer_email_end')
 
-                @stack('customer_phone_start')
+                @stack('customer_telegram_chat_id_start')
                 <li class="list-group-item border-0 border-top-1">
-                    <div class="font-weight-600">{{ trans('general.phone') }}</div>
-                    <div><small class="long-texts" title="{{ $customer->phone }}">{{ $customer->phone }}</small></div>
+                    <div class="font-weight-600">{{ trans('general.telegram') }}</div>
+                    <div><small class="long-texts" title="{{ $customer->telegram_chat_id }}">{{ $customer->telegram_chat_id . (!empty($customer->telegram_id) ? ' ('.$customer->telegram_id.')' : '') }}</small></div>
                 </li>
-                @stack('customer_phone_end')
+                @stack('customer_telegram_chat_id_end')
 
-                @stack('customer_website_start')
+                @stack('customer_utm_start')
                 <li class="list-group-item border-0 border-top-1">
-                    <div class="font-weight-600">{{ trans('general.website') }}</div>
-                    <div><small class="long-texts" title="{{ $customer->website }}">{{ $customer->website }}</small></div>
+                    <div class="font-weight-600">{{ trans('general.utm') }}</div>
+                    <div><small class="long-texts" title="{{ $customer->utm }}">{{ $customer->utm ?: trans('general.na') }}</small></div>
                 </li>
-                @stack('customer_website_end')
+                @stack('customer_utm_end')
 
-                @stack('customer_tax_number_start')
+                @stack('customer_mt_start')
                 <li class="list-group-item border-0 border-top-1">
-                    <div class="font-weight-600">{{ trans('general.tax_number') }}</div>
-                    <div><small class="long-texts" title="{{ $customer->tax_number }}">{{ $customer->tax_number }}</small></div>
+                    <div class="font-weight-600">Metatraders id</div>
+                    <div><small class="long-texts" title="{{ $customer->mtString }}">{{ str_replace(PHP_EOL, ', ', trim($customer->mtString)) }}</small></div>
                 </li>
-                @stack('customer_tax_number_end')
-
-                @stack('customer_address_start')
-                <li class="list-group-item border-0 border-top-1">
-                    <div class="font-weight-600">{{ trans('general.address') }}</div>
-                    <div><small>{{ $customer->address }}</small></div>
-                </li>
-                @stack('customer_address_end')
+                @stack('customer_mt_end')
 
                 @if ($customer->reference)
                     @stack('customer_reference_start')

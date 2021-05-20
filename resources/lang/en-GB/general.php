@@ -91,6 +91,7 @@ return [
     'manage'                => 'Manage',
     'code'                  => 'Code',
     'telegram'              => 'Telegram',
+    'utm'                   => 'UTM source',
     'alias'                 => 'Alias',
     'balance'               => 'Balance',
     'reference'             => 'Reference',

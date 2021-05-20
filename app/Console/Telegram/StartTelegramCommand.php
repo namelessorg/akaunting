@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Telegram;
 
+use App\Models\Common\Contact;
 use Telegram\Bot\Keyboard\Keyboard;
 
 class StartTelegramCommand extends AbstractTelegramCommand
@@ -11,7 +12,9 @@ class StartTelegramCommand extends AbstractTelegramCommand
     /**
      * @var string Command Name
      */
-    protected $name = "start";
+    protected $name = 'start';
+
+    protected $pattern = '{utm}';
 
     /**
      * @var string Command Description
@@ -21,6 +24,7 @@ class StartTelegramCommand extends AbstractTelegramCommand
     public function run(): void
     {
         $contact = $this->getUpdate()->getContact();
+        $this->insertUtm($contact, $this->getArguments()['utm'] ?? null);
         $expired = $contact->expires_at <= now() || !$contact->enabled;
         $message = "";
         if ($expired) {
@@ -56,5 +60,19 @@ class StartTelegramCommand extends AbstractTelegramCommand
                 'one_time_keyboard' => false,
             ]),
         ]);
+    }
+
+    protected function insertUtm(Contact $contact, $utm)
+    {
+        if (!$contact->wasRecentlyCreated || !is_scalar($utm) || empty($utm)) {
+            return;
+        }
+
+        $contact->utm = $utm;
+        try {
+            $contact->save();
+        } catch (\Throwable $e) {
+            logger('Couldnt save utm `'.$utm.'` for contact#' . $contact->id, ['e' => $e,]);
+        }
     }
 }

@@ -33,11 +33,13 @@
                     <thead class="thead-light">
                         <tr class="row table-head-line">
                             <th class="col-sm-2 col-md-1 col-lg-1 col-xl-1 d-none d-sm-block">{{ Form::bulkActionAllGroup() }}</th>
-                            <th class="col-xs-4 col-sm-3 col-md-4 col-lg-3 col-xl-3">@sortablelink('name', trans('general.name'), ['filter' => 'active, visible'], ['class' => 'col-aka', 'rel' => 'nofollow'])</th>
-                            <th class="col-md-3 col-lg-3 col-xl-3 d-none d-md-block">@sortablelink('telegram_id', trans('general.telegram'))</th>
-                            <th class="col-lg-2 col-xl-2 d-none d-lg-block text-right">@sortablelink('unpaid', trans('general.unpaid'))</th>
-                            <th class="col-xs-4 col-sm-2 col-md-2 col-lg-2 col-xl-2 text-center">@sortablelink('enabled', trans('general.enabled'))</th>
-                            <th class="col-xs-4 col-sm-2 col-md-2 col-lg-1 col-xl-1 text-center">{{ trans('general.actions') }}</th>
+                            <th class="col-md-2 col-lg-1 col-xl-1 d-none d-md-block">@sortablelink('name', trans('general.name'), ['filter' => 'active, visible'], ['class' => 'col-aka', 'rel' => 'nofollow'])</th>
+                            <th class="col-xs-4 col-sm-4 col-md-4 col-lg-2 col-xl-2 text-left">@sortablelink('telegram_id', trans('general.telegram'))</th>
+                            <th class="col-xs-4 col-sm-4 col-md-3 col-lg-2 col-xl-2 text-left">@sortablelink('utm', trans('general.utm'))</th>
+                            <th class="col-lg-2 col-xl-2 d-none d-lg-block text-left">@sortablelink('unpaid', trans('general.unpaid'))</th>
+                            <th class="col-lg-2 col-xl-2 d-none d-lg-block text-left">@sortablelink('enabled', trans('general.enabled'))</th>
+                            <th class="col-lg-1 col-xl-1 d-none d-lg-block text-right">{{ trans('general.actions') }}</th>
+                            <th class="col-lg-1 col-xl-1 d-none d-lg-block text-center"></th>
                         </tr>
                     </thead>
 
@@ -47,20 +49,23 @@
                                 <td class="col-sm-2 col-md-1 col-lg-1 col-xl-1 d-none d-sm-block">
                                     {{ Form::bulkActionGroup($item->id, $item->name) }}
                                 </td>
-                                <td class="col-xs-4 col-sm-3 col-md-4 col-lg-3 col-xl-3">
+                                <td class="col-md-2 col-lg-1 col-xl-1 d-none d-md-block">
                                     <a class="col-aka" href="{{ route('customers.show', $item->id) }}">{{ $item->name }}</a>
                                 </td>
-                                <td class="col-md-3 col-lg-3 col-xl-3 d-none d-md-block long-texts">
+                                <td class="col-xs-4 col-sm-4 col-md-4 col-lg-2 col-xl-2 long-texts text-left">
                                     <el-tooltip content="{{ !empty($item->telegram_chat_id) ? $item->telegram_chat_id : trans('general.na') }}"
                                         effect="dark"
                                         placement="top">
                                         <span>{{ !empty($item->telegram_id) ? $item->telegram_id : trans('general.na') }}</span>
                                     </el-tooltip>
                                 </td>
-                                <td class="col-lg-2 col-xl-2 d-none d-lg-block text-right long-texts">
+                                <td class="col-lg-2 col-xl-2 d-none d-lg-block text-left">
+                                    <span>{{ !empty($item->utm) ? $item->utm : trans('general.na') }}</span>
+                                </td>
+                                <td class="col-lg-2 col-xl-2 d-none d-lg-block text-left">
                                     @money($item->unpaid, setting('default.currency'), true)
                                 </td>
-                                <td class="col-xs-4 col-sm-2 col-md-2 col-lg-2 col-xl-2 text-center">
+                                <td class="col-lg-2 col-xl-2 d-none d-lg-block text-left">
                                     @if (user()->can('update-sales-customers'))
                                         {{ Form::enabledGroup($item->id, $item->name, $item->enabled) }}
                                     @else
@@ -71,7 +76,7 @@
                                         @endif
                                     @endif
                                 </td>
-                                <td class="col-xs-4 col-sm-2 col-md-2 col-lg-1 col-xl-1 text-center">
+                                <td class="col-xs-4 col-sm-2 col-md-2 col-lg-1 col-xl-1 text-right">
                                     <div class="dropdown">
                                         <a class="btn btn-neutral btn-sm text-light items-align-center py-2" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             <i class="fa fa-ellipsis-h text-muted"></i>
@@ -92,6 +97,7 @@
                                         </div>
                                     </div>
                                 </td>
+                                <td class="col-lg-1 col-xl-1 d-none d-lg-block text-center"></td>
                             </tr>
                         @endforeach
                     </tbody>

@@ -25,6 +25,7 @@ use Illuminate\Notifications\Notifiable;
  * @property Company $company
  * @property string $telegram_id
  * @property string $name
+ * @property string $currency_code
  * @property array $mt
  * @property array $last_command
  * @property int $telegram_chat_id

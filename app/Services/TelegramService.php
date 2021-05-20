@@ -86,7 +86,7 @@ class TelegramService
         $contact = $update->getContact();
         if (isset($contact->last_command['name'])) {
             $telegram->triggerCommand($contact->last_command['name'], $update, $contact->last_command['entity'] ?? []);
-        } elseif (isset($update->callbackQuery->data) && is_scalar($update->callbackQuery->data)) {
+        } elseif ($update->callbackQuery && is_scalar($update->callbackQuery->data)) {
             $telegram->triggerCommand(explode(' ', ltrim($update->callbackQuery->data ?? '', '/'))[0] ?? '', $update);
         }
     }
@@ -149,7 +149,7 @@ class TelegramService
     {
         /** @var Contact $user */
         $user = $company->customers()->whereNested(function (Builder $builder) use ($id, $username) {
-            if (strlen($username) > 1) {
+            if ($username && strlen($username) > 1) {
                 $builder->orWhere('telegram_id', $username);
             }
             $builder->orWhere('telegram_chat_id', $id);

@@ -23,6 +23,7 @@
                 {{ Form::textGroup('email', trans('general.email'), 'envelope', []) }}
 
                 {{-- Form::selectAddNewGroup('currency_code', trans_choice('general.currencies', 1), 'exchange-alt', $currencies, $customer->currency_code, ['required' => 'required', 'path' => route('modals.currencies.create'), 'field' => ['key' => 'code', 'value' => 'name']]) --}}
+                <input type="hidden" name="currency_code" value="USD"/>
 
                 {{ Form::numberGroup('telegram_chat_id', 'Telegram chat id', 'paper-plane', ['required' => 'required']) }}
 

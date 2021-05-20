@@ -8,6 +8,9 @@ use App\Models\Auth\User;
 use App\Models\Common\Contact;
 use App\Services\TelegramService;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Telegram\Bot\Exceptions\TelegramResponseException;
 
 class UpdateContact extends Job
 {
@@ -57,21 +60,25 @@ class UpdateContact extends Job
 
             $telegramService = app(TelegramService::class);
             if ($this->contact->isCustomer() && $this->request->has('enabled')) {
-                try {
-                    if ($this->request->get('enabled', false)) {
+                if ($this->request->get('enabled', false)) {
+                    try {
                         $telegramService->addUser(
                             $this->contact,
                             $this->contact->company
                         );
-                        logger("Contact#{$this->contact->id} added to telegram group for company# `{$this->contact->company->name}` from admin update contact");
-                    } else {
+                    } catch (TelegramResponseException $e) {
+                        throw new BadRequestHttpException('Telegram integration error. ' . $e->getMessage());
+                    }
+                    logger("Contact#{$this->contact->id} added to telegram group for company# `{$this->contact->company->name}` from admin update contact");
+                } else {
+                    try {
                         $telegramService->kick(
                             $this->contact,
                             $this->contact->company);
-                        logger("Contact#{$this->contact->id} kicked from telegram group for company# `{$this->contact->company->name}` from admin update contact");
+                    } catch (TelegramResponseException $e) {
+                        flash()->message($e->getMessage());
                     }
-                } catch (\Throwable $e) {
-                    flash()->message($e->getMessage());
+                    logger("Contact#{$this->contact->id} kicked from telegram group for company# `{$this->contact->company->name}` from admin update contact");
                 }
             }
         });

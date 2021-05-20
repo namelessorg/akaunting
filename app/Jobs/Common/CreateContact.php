@@ -8,6 +8,8 @@ use App\Models\Auth\Role;
 use App\Models\Common\Contact;
 use App\Services\TelegramService;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Telegram\Bot\Exceptions\TelegramResponseException;
 
 class CreateContact extends Job
 {
@@ -52,10 +54,17 @@ class CreateContact extends Job
                     logger("Contact#{$this->contact->id} added to telegram group for company# `{$this->contact->company->name}` from admin update contact");
                 } else {
                     // чтобы можно было кикнуть левых юзеров
-                    $telegramService->kick(
-                        $this->contact,
-                        $this->contact->company);
-                    logger("Contact#{$this->contact->id} kicked from telegram group for company# `{$this->contact->company->name}` from admin update contact");
+                    try {
+                        $telegramService->kick(
+                            $this->contact,
+                            $this->contact->company);
+                        logger("Contact#{$this->contact->id} kicked from telegram group for company# `{$this->contact->company->name}` from admin update contact");
+                    } catch (TelegramResponseException $e) {
+                        logger("Contact#{$this->contact->id} kicking error for company# `{$this->contact->company->name}` from admin update contact with exception: " . $e->getMessage(), ['e' => $e,]);
+                        if ($e->getCode() === 400) {
+                            throw new BadRequestHttpException(sprintf('Invalid telegram chat id (%s)', $e->getMessage()));
+                        }
+                    }
                 }
             }
             // Upload logo

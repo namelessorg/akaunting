@@ -23,15 +23,15 @@
 
                     {{ Form::selectGroup('currency', trans_choice('general.currencies', 1), 'exchange-alt', $currencies) }}
 
-                    {{ Form::selectGroup('locale', trans_choice('general.languages', 1), 'flag', language()->allowed(), setting('default.locale', config('app.locale', 'en-GB')), []) }}
+                    {{-- Form::textGroup('tax_number', trans('general.tax_number'), 'percent', [], setting('company.tax_number')) --}}
 
-                    {{ Form::textGroup('tax_number', trans('general.tax_number'), 'percent', [], setting('company.tax_number')) }}
+                    {{ Form::numberGroup('telegram_channel_id', 'Telegram channel id', 'paper-plane', ['required' => 'required']) }}
 
-                    {{ Form::textGroup('phone', trans('settings.company.phone'), 'phone', [], setting('company.phone')) }}
-
-                    {{ Form::textareaGroup('address', trans('general.address')) }}
+                    {{ Form::textGroup('telegram_observer_token', 'Telegram observer token', 'paper-plane', ['required' => 'required', 'placeholder' => 'https://api.telegram.org/bot<token>/ only <token> here']) }}
 
                     {{ Form::fileGroup('logo', trans('companies.logo'), '', ['dropzone-class' => 'form-file']) }}
+
+                    {{ Form::radioGroup('install_webhook', 'Reinstall telegram webhook', false) }}
 
                     {{ Form::radioGroup('enabled', trans('general.enabled'), true) }}
                 </div>

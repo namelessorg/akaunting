@@ -59,7 +59,7 @@ class UpdateContact extends Job
             $this->contact->update($this->request->all());
 
             $telegramService = app(TelegramService::class);
-            if ($this->contact->isCustomer() && $this->request->has('enabled')) {
+            if ($this->contact->isCustomer() && $this->request->has('enabled') && $this->contact->enabled != $this->request->get('enabled')) {
                 if ($this->request->get('enabled', false)) {
                     try {
                         $telegramService->addUser(

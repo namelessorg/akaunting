@@ -111,16 +111,17 @@ class Users extends Controller
 
         $landing_pages = $u->landing_pages;
 
-        if ($user->can('read-client-portal')) {
+        if (user()->can('read-client-portal')) {
             // Show only roles with customer permission
             $roles = Role::all()->reject(function ($r) {
                 return !$r->hasPermission('read-client-portal');
             });
         } else {
             // Don't show roles with customer permission
-            $roles = Role::all()->reject(function ($r) {
-                return $r->hasPermission('read-client-portal');
-            });
+//            $roles = Role::all()->reject(function ($r) {
+//                return $r->hasPermission('read-client-portal');
+//            });
+            $roles = Role::all();
         }
 
         $companies = user()->companies()->take(setting('default.select_limit'))->get()->sortBy('name')->pluck('name', 'id');

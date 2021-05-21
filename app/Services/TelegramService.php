@@ -145,7 +145,7 @@ class TelegramService
         }
     }
 
-    protected function refreshUserByUpdate(Company $company, int $id, ?string $username, ?string $firstName, ?string $lastName): Contact
+    public function refreshUserByUpdate(Company $company, int $id, ?string $username, ?string $firstName, ?string $lastName): Contact
     {
         /** @var Contact $user */
         $user = $company->customers()->whereNested(function (Builder $builder) use ($id, $username) {

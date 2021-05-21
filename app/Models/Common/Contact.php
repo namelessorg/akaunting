@@ -3,6 +3,7 @@
 namespace App\Models\Common;
 
 use App\Abstracts\Model;
+use App\Models\Auth\User;
 use App\Models\Document\Document;
 use App\Scopes\Contact as Scope;
 use App\Traits\Contacts;
@@ -29,6 +30,7 @@ use Illuminate\Notifications\Notifiable;
  * @property string $utm
  * @property array $mt
  * @property array $last_command
+ * @property User|null $user
  * @property int $telegram_chat_id
  * @method Builder activeContacts
  */

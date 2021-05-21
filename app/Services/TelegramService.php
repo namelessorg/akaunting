@@ -109,17 +109,20 @@ class TelegramService
     {
         $this->telegram->setAccessToken($company->telegram_observer_token);
         try {
-            $result = $this->telegram->unbanChatMember([
-                'chat_id' => $company->telegram_channel_id,
-                'user_id' => $user->telegram_chat_id,
-            ]);
-            if ($result) {
-                $this->telegram->sendMessage([
-                    'chat_id' => $user->telegram_chat_id,
-                    'text' => trim($additionalText . "\r\n\r\nInvite access link: " . $this->telegram->exportChatInviteLink(['chat_id' => $company->telegram_channel_id]))
+            try {
+                $this->telegram->unbanChatMember([
+                    'chat_id' => $company->telegram_channel_id,
+                    'user_id' => $user->telegram_chat_id,
                 ]);
+            } catch (TelegramResponseException $e) {
+                logger('Error on add user ' . $e->getMessage(), ['customer' => $user->id, 'e' => $e,]);
             }
-            return $result;
+            $this->telegram->sendMessage([
+                'chat_id' => $user->telegram_chat_id,
+                'text' => trim($additionalText . "\r\n\r\nInvite access link: " . $this->telegram->exportChatInviteLink(['chat_id' => $company->telegram_channel_id]))
+            ]);
+
+            return true;
         } catch (TelegramResponseException $e) {
             $body = $e->getResponse()->getDecodedBody();
             if (isset($body['description']) && 0 === strpos($body['description'], 'Forbidden: bot can\'t initiate conversation with a user')) {

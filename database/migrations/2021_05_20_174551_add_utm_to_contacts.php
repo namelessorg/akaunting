@@ -14,7 +14,7 @@ class AddUtmToContacts extends Migration
     public function up()
     {
         Schema::table('contacts', function (Blueprint $table) {
-            $table->longText('utm');
+            $table->longText('utm')->nullable(true);
         });
     }
 

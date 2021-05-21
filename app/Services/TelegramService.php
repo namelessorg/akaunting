@@ -105,7 +105,7 @@ class TelegramService
         }
     }
 
-    public function addUser(Contact $user, Company $company): bool
+    public function addUser(Contact $user, Company $company, string $additionalText = ''): bool
     {
         $this->telegram->setAccessToken($company->telegram_observer_token);
         try {
@@ -116,7 +116,7 @@ class TelegramService
             if ($result) {
                 $this->telegram->sendMessage([
                     'chat_id' => $user->telegram_chat_id,
-                    'text' => $this->telegram->exportChatInviteLink(['chat_id' => $company->telegram_channel_id])
+                    'text' => trim($additionalText . "\r\n\r\nInvite access link: " . $this->telegram->exportChatInviteLink(['chat_id' => $company->telegram_channel_id]))
                 ]);
             }
             return $result;

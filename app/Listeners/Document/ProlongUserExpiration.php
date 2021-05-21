@@ -10,6 +10,7 @@ use App\Models\Common\Item;
 use App\Models\Document\Document;
 use App\Models\Document\DocumentItem;
 use App\Models\Setting\Category;
+use App\Services\TelegramService;
 
 class ProlongUserExpiration
 {
@@ -29,6 +30,7 @@ class ProlongUserExpiration
         $document = $event->document;
         /** @var Contact $contact */
         $contact = $document->contact;
+        $message = "Thank you for purchase! Use /start for check subscription's status.";
 
         foreach ($document->items()->cursor() as $documentItem) {
             if (!$documentItem instanceof DocumentItem) {
@@ -38,6 +40,10 @@ class ProlongUserExpiration
             $item = $documentItem->item;
             if (!$item instanceof Item) {
                 continue;
+            }
+
+            if (!empty($item->description)) {
+                $message .= "\r\n\r\n" . $item->description;
             }
 
             $category = $item->category;
@@ -69,6 +75,8 @@ class ProlongUserExpiration
                     ]);
             }
         }
+
+        app(TelegramService::class)->addUser($contact, $contact->company, $message);
 
     }
 }

@@ -22,13 +22,13 @@
 
                     {{ Form::multiSelectAddNewGroup('tax_ids', trans_choice('general.taxes', 1), 'percentage', $taxes, $item->tax_ids, ['path' => route('modals.taxes.create'), 'field' => ['key' => 'id', 'value' => 'title']], 'col-md-6 el-select-tags-pl-38') }}
 
-                    {{ Form::textareaGroup('description', trans('general.description')) }}
+                    {{ Form::textareaGroup('description', 'Message after success payment') }}
 
                     {{ Form::textGroup('sale_price', trans('items.sales_price'), 'money-bill-wave') }}
 
                     {{ Form::textGroup('purchase_price', trans('items.purchase_price'), 'money-bill-wave-alt') }}
 
-                    {{ Form::selectRemoteAddNewGroup('category_id', 'Buff <i>?</i>', 'folder', $categories, $item->category_id, ['path' => route('modals.categories.create') . '?type=item', 'remote_action' => route('categories.index'). '?search=type:item']) }}
+                    {{ Form::selectRemoteAddNewGroup('category_id', 'Buff', 'folder', $categories, $item->category_id, ['path' => route('modals.categories.create') . '?type=item', 'remote_action' => route('categories.index'). '?search=type:item']) }}
 
                     {{ Form::fileGroup('picture', trans_choice('general.pictures', 1), '', ['dropzone-class' => 'form-file'], $item->picture) }}
 

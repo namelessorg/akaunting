@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $name
  * @property bool $enabled
  * @property-read Category $category
+ * @property string $description
  */
 class Item extends Model
 {

@@ -50,6 +50,17 @@
                 </li>
                 @stack('customer_mt_end')
 
+                @stack('customer_expiration_start')
+                <li class="list-group-item border-0 border-top-1">
+                    <div class="font-weight-600">Expires at</div>
+                    <div>
+                        <small class="long-texts" title="{{ $customer->expires_at instanceof \Carbon\CarbonInterface ? $customer->expires_at->diffForHumans(now()) : 'Already expired' }}">
+                            {{ $customer->expires_at instanceof \Carbon\CarbonInterface ? $customer->expires_at->format('d.m.Y \a\t H:i:s') : '-' }}
+                        </small>
+                    </div>
+                </li>
+                @stack('customer_expiration_end')
+
                 @if ($customer->reference)
                     @stack('customer_reference_start')
                     <li class="list-group-item border-0 border-top-1">

@@ -30,8 +30,13 @@ class StartTelegramCommand extends AbstractTelegramCommand
         if ($expired) {
             $message .= "You have no subscription now.\r\n";
         } else {
-            $message .= "You subscription will expired: " . $contact->expires_at->diffForHumans(now()) . "\r\n";
+            $message .= "You subscription will expire in " . $contact->expires_at->diffForHumans(now()) . "\r\n";
+            if (!empty($contact->mt)) {
+                $message .= "\r\nYour metatrader id is <b>" . implode('</b>, <b>', $contact->mt) . "</b>\r\nFor change it use command /mt\r\n";
+            }
         }
+
+        $message .= "\r\n";
 
         $keyboard = [];
         foreach ($this->getUpdate()->getContact()->company->items as $item) {
@@ -50,10 +55,13 @@ class StartTelegramCommand extends AbstractTelegramCommand
 
         if (empty($keyboard)) {
             $message .= "For buy new subscription, came back later. Temporary we haven't offer for you";
+        } else {
+            $message .= "Now we have " . count($keyboard) . " subscription " . trans_choice('general.option', count($keyboard)) . ", choose one from list";
         }
 
         $this->replyWithMessage([
             'text' => $message,
+            'parse_mode' => 'HTML',
             'reply_markup' => json_encode([
                 'inline_keyboard' => [$keyboard],
                 'resize_keyboard' => true,

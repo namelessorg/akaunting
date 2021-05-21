@@ -24,6 +24,7 @@ class AddCustomerTelegramCommand extends AbstractTelegramCommand
         }
 
         if (!$message->forwardFrom) {
+            $this->isItEndOfDialog = false;
             $this->replyWithMessage([
                 'chat_id' => $message->from->id,
                 'text' => 'Forward one message from your dialog with new user. For example, select one message which was sent by customer who should be add',
@@ -58,8 +59,6 @@ class AddCustomerTelegramCommand extends AbstractTelegramCommand
             $firstName,
             $lastName
         );
-
-        $this->isItEndOfDialog = true;
 
         if ($newCustomer->wasRecentlyCreated) {
             $response = "New customer#{$newCustomer->id} successfully added";

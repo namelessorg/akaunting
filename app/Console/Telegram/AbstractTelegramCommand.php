@@ -12,7 +12,7 @@ use Telegram\Bot\Commands\Command;
 abstract class AbstractTelegramCommand extends Command
 {
 
-    protected $isItEndOfDialog = false;
+    protected $isItEndOfDialog = true;
 
     final public function handle()
     {

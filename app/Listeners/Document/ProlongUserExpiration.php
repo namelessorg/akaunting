@@ -64,6 +64,7 @@ class ProlongUserExpiration
             switch ($command) {
                 case 'user':
                     $contact->expires_at = $args;
+                    $contact->enabled = true;
                     $contact->save();
                     break;
                 default:

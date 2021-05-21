@@ -3,6 +3,7 @@
 namespace App\Jobs\Auth;
 
 use App\Abstracts\Job;
+use App\Models\Common\Contact;
 
 class DeleteUser extends Job
 {
@@ -28,6 +29,7 @@ class DeleteUser extends Job
         $this->authorize();
 
         \DB::transaction(function () {
+            Contact::query()->where('user_id', $this->user->id)->update(['user_id' => null,]);
             $this->user->delete();
 
             $this->user->flushCache();

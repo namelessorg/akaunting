@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Console\Telegram;
 
 use App\Jobs\Document\CreateDocument;
+use App\Lib\Telegram\Update;
 use App\Models\Common\Company;
+use App\Models\Common\Contact;
 use App\Models\Common\Item;
 use App\Models\Document\Document;
 use App\Services\TelegramService;
@@ -30,7 +32,7 @@ class SubscribeTelegramCommand extends AbstractTelegramCommand
      */
     protected $description = "Subscribe Command to get bill";
 
-    public function run(): void
+    public function run(Contact $contact, Update $update): void
     {
         $id = explode(' ', ltrim($this->getUpdate()->callbackQuery->data, '/'))[1] ?? null;
         /** @var Item $item */
@@ -39,7 +41,6 @@ class SubscribeTelegramCommand extends AbstractTelegramCommand
             return;
         }
 
-        $contact = $this->getUpdate()->getContact();
         $contact->company->makeCurrent();
         $invoicesToday = $contact->invoices()->where('created_at', '>', Carbon::yesterday())->where('created_at', '<', Carbon::now())->count();
         if ($invoicesToday > self::INVOICES_PER_DAY_LIMIT) {

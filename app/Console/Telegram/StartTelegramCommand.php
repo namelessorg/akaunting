@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Telegram;
 
+use App\Lib\Telegram\Update;
 use App\Models\Common\Contact;
 use Telegram\Bot\Keyboard\Keyboard;
 
@@ -21,9 +22,8 @@ class StartTelegramCommand extends AbstractTelegramCommand
      */
     protected $description = "Start Command to get you started";
 
-    public function run(): void
+    public function run(Contact $contact, Update $update): void
     {
-        $contact = $this->getUpdate()->getContact();
         $this->insertUtm($contact, $this->getArguments()['utm'] ?? null);
         $expired = $contact->expires_at <= now() || !$contact->enabled;
         $message = "";

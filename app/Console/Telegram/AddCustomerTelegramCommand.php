@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Telegram;
 
+use App\Lib\Telegram\Update;
+use App\Models\Common\Contact;
 use App\Services\TelegramService;
 
 class AddCustomerTelegramCommand extends AbstractTelegramCommand
@@ -13,15 +15,15 @@ class AddCustomerTelegramCommand extends AbstractTelegramCommand
      */
     protected $name = 'add_user';
 
-    public function run(): void
+    public function run(Contact $contact, Update $update): void
     {
-        $user = $this->getContact()->user;
-        $message = $this->getUpdate()->message;
+        $user = $contact->user;
+        $message = $update->message;
         if (!$user || !$user->enabled || !$user->can('create-sales-customers')) {
             return;
         }
 
-        if (!$message->forwardFromChat && !$message->contact) {
+        if (!$message->forwardFrom) {
             $this->replyWithMessage([
                 'chat_id' => $message->from->id,
                 'text' => 'Forward one message from your dialog with new user. For example, select one message which was sent by customer who should be add',
@@ -59,9 +61,15 @@ class AddCustomerTelegramCommand extends AbstractTelegramCommand
 
         $this->isItEndOfDialog = true;
 
+        if ($newCustomer->wasRecentlyCreated) {
+            $response = "New customer#{$newCustomer->id} successfully added";
+        } else {
+            $response = "Refresh exist customer#{$newCustomer->id}";
+        }
+
         $this->replyWithMessage([
             'chat_id' => $message->from->id,
-            'text' => "New customer#{$newCustomer->id} successfully ended: " . route('customers.show', $newCustomer->id),
+            'text' => $response . PHP_EOL . PHP_EOL . route('customers.show', ['customer' => $newCustomer->id, 'company_id' => $newCustomer->company->id,]),
         ]);
     }
 }

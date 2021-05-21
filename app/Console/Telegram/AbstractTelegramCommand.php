@@ -16,13 +16,15 @@ abstract class AbstractTelegramCommand extends Command
 
     final public function handle()
     {
-        $this->getUpdate()->setIsProcessed(true);
-        $this->getUpdate()->getContact()->last_command = [
+        $update = $this->getUpdate();
+        $contact = $update->getContact();
+        $update->setIsProcessed(true);
+        $update->getContact()->last_command = [
             'name' => $this->name,
             'entity' => $this->entity,
         ];
 
-        if (!$this->getUpdate()->getContact()->company->enabled) {
+        if (!$contact->company->enabled) {
             $this->replyWithMessage([
                 'text' => "Sorry, we're down for maintenance\r\nWe'll be back up shortly"
             ]);
@@ -30,18 +32,20 @@ abstract class AbstractTelegramCommand extends Command
         }
 
         try {
-            $this->run();
+            $this->run($contact, $update);
         } catch (\Throwable $e) {
             app(LoggerInterface::class)->error($e->getMessage(), ['e' => $e,]);
             throw $e;
-        }
+        } finally {
+            if ($this->isItEndOfDialog()) {
+                $contact->last_command = [];
+            }
 
-        if ($this->isItEndOfDialog()) {
-            $this->getUpdate()->getContact()->last_command = [];
+            $contact->save();
         }
     }
 
-    abstract public function run(): void;
+    abstract public function run(Contact $contact, Update $update): void;
 
     /**
      * @return Update

@@ -56,8 +56,6 @@ class UpdateContact extends Job
                 $this->contact->attachMedia($media, 'logo');
             }
 
-            $this->contact->update($this->request->all());
-
             $telegramService = app(TelegramService::class);
             if ($this->contact->isCustomer() && $this->request->has('enabled') && $this->contact->enabled != $this->request->get('enabled')) {
                 if ($this->request->get('enabled', false)) {
@@ -81,6 +79,8 @@ class UpdateContact extends Job
                     logger("Contact#{$this->contact->id} kicked from telegram group for company# `{$this->contact->company->name}` from admin update contact");
                 }
             }
+
+            $this->contact->update($this->request->all());
         });
 
         return $this->contact;
@@ -96,7 +96,7 @@ class UpdateContact extends Job
         if (($this->request['enabled'] == 0) && ($relationships = $this->getRelationships())) {
             $message = trans('messages.warning.disabled', ['name' => $this->contact->name, 'text' => implode(', ', $relationships)]);
 
-            throw new \Exception($message);
+            //throw new \Exception($message);
         }
     }
 

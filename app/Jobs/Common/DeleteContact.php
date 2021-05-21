@@ -52,7 +52,7 @@ class DeleteContact extends Job
         if ($relationships = $this->getRelationships()) {
             $message = trans('messages.warning.deleted', ['name' => $this->contact->name, 'text' => implode(', ', $relationships)]);
 
-            throw new \Exception($message);
+            //throw new \Exception($message);
         }
     }
 

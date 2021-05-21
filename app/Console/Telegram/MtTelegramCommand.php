@@ -13,6 +13,14 @@ class MtTelegramCommand extends AbstractTelegramCommand
 
     public function run(Contact $contact, Update $update): void
     {
+        if (!$contact->enabled) {
+            $message = "Only active users can change Meta Trader id, move to command /start for purchase subscription";
+            $this->replyWithMessage([
+                'text' => $message,
+            ]);
+            return;
+        }
+
         if (!$update->message->text) {
             return;
         }
@@ -23,7 +31,12 @@ class MtTelegramCommand extends AbstractTelegramCommand
                 $message .= "Your metatrader id is <b>" . implode('</b>, <b>', $contact->mt) . "</b>\r\n\r\n";
             }
 
-            $message .= "For change your access id, send me number identity of your Meta Trader application in next message";
+            if ($contact->enabled) {
+                $message .= "For change your access id, send me number identity of your Meta Trader application in next message";
+            } else {
+                $message .= "Only subscribed users can change Meta Trader id, move to command /start for purchase";
+            }
+
             $this->replyWithMessage([
                 'text' => $message,
                 'parse_mode' => 'HTML',

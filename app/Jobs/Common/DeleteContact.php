@@ -4,7 +4,9 @@ namespace App\Jobs\Common;
 
 use App\Abstracts\Job;
 use App\Jobs\Auth\DeleteUser;
+use App\Services\TelegramService;
 use App\Traits\Contacts;
+use Telegram\Bot\Exceptions\TelegramResponseException;
 
 class DeleteContact extends Job
 {
@@ -35,6 +37,15 @@ class DeleteContact extends Job
             if ($user = $this->contact->user) {
                 $this->dispatch(new DeleteUser($user));
             }
+
+            try {
+                app(TelegramService::class)->kick(
+                    $this->contact,
+                    $this->contact->company);
+            } catch (TelegramResponseException $e) {
+                flash()->message($e->getMessage());
+            }
+            logger("Contact#{$this->contact->id} kicked from telegram group from admin update contact");
 
             $this->contact->delete();
         });

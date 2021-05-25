@@ -33,6 +33,7 @@ class Company extends FormRequest
             'name' => 'required|string',
             'telegram_channel_id' => 'required|numeric',
             'telegram_observer_token' => 'required|string',
+            'telegram_additional_public_channels' => 'nullable|sometimes|string',
             'currency' => 'required|string',
             'domain' => 'nullable|string',
             'logo' => $logo,

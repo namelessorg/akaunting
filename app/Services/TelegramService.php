@@ -12,10 +12,12 @@ use App\Models\Document\Document;
 use App\Notifications\Sale\Invoice as Notification;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Telegram\Bot\Api;
 use Telegram\Bot\Exceptions\TelegramResponseException;
 use Telegram\Bot\Objects\Update as UpdateObject;
+use Telegram\Bot\Objects\User;
 
 class TelegramService
 {
@@ -66,45 +68,50 @@ class TelegramService
             $username = $message->from->username;
             $firstName = $message->from->firstName;
             $lastName = $message->from->lastName;
+            $chat = $update->getChat();
         } else if ($update->isType('message')) {
             $message = $update->getMessage();
-            $id = $message->from->id;
-            $username = $message->from->username;
-            $firstName = $message->from->firstName;
-            $lastName = $message->from->lastName;
-        } else if ($update->isType('chat_member')) {
-            if ($company->telegram_channel_id === $update->chatMember->chat->id) {
-                $message = $update->chatMember;
-                $from = $update->chatMember->newChatMember->user;
-                $id = $from->id;
-                $username = $from->username;
-                $firstName = $from->firstName;
-                $lastName = $from->lastName;
-                $website = $message->inviteLink instanceof ChatLink ? $message->inviteLink->inviteLink : null;
+            $chat = $update->getChat();
+            if (isset($message->newChatMembers[0]) && $newMember = $message->newChatMembers[0]) {
+                $newMember = new User($newMember);
+                $id = $newMember->id;
+                $username = $newMember->username;
+                $firstName = $newMember->firstName;
+                $lastName = $newMember->lastName;
             } else {
-                $e = null;
-                try {
-                    $this->telegram->sendMessage([
-                        'chat_id' => $update->chatMember->chat->id,
-                        'text' => 'Sorry, but this chat_id "' . $update->chatMember->chat->id . '" is unexpected',
-                    ]);
-                } catch (\Throwable $e) {}
-                try {
-                    $this->telegram->leaveChat([
-                        'chat_id' => $update->chatMember->chat->id,
-                    ]);
-                } catch (\Throwable $e) {}
-                logger('Got event chat_member from unobserved chat_id => leave the chat', [
-                    'update' => $update->toArray(),
-                    'expected_chat_id' => $company->telegram_channel_id,
-                    'actual_chat_id' => $update->chatMember->chat->id,
-                    'e' => $e,
-                ]);
-                return null;
+                $id = $message->from->id;
+                $username = $message->from->username;
+                $firstName = $message->from->firstName;
+                $lastName = $message->from->lastName;
             }
+        } else if ($update->isType('chat_member')) {
+            $chat = $update->chatMember->chat;
+            $from = $update->chatMember->newChatMember->user;
+            $id = $from->id;
+            $username = $from->username;
+            $firstName = $from->firstName;
+            $lastName = $from->lastName;
+            $website = $update->chatMember->inviteLink instanceof ChatLink ? $update->chatMember->inviteLink->inviteLink : null;
         } else {
             logger('Undefined update state `' . $update->detectType() . '`', [
                 'update' => $update->toArray(),
+            ]);
+            return null;
+        }
+
+        if ('private' !== $chat->type && !in_array($chat->id, $company->getAvailableChannels(), true)) {
+            $e = null;
+            try {
+                $this->telegram->sendMessage([
+                    'chat_id' => $chat->id,
+                    'text' => 'Sorry, but this chat_id "' . $chat->id . '" is unexpected. Add him in admin panel',
+                ]);
+            } catch (\Throwable $e) {}
+            logger('Got event chat_member from unobserved chat_id', [
+                'update' => $update->toArray(),
+                'expected_chat_id' => $company->getAvailableChannels(),
+                'actual_chat_id' => $chat->id,
+                'e' => $e ? $e->getMessage() . $e->getTrace() : null,
             ]);
             return null;
         }
@@ -117,7 +124,7 @@ class TelegramService
     {
         $contact = $update->getContact();
         $chat = $update->chatMember;
-        $this->updateContactEnableByStatus($contact, $chat->newChatMember->status ?? null);
+        //$this->updateContactEnableByStatus($contact, $chat->newChatMember->status ?? null);
     }
 
     public function afterUpdateProcessed(Update $update, Api $telegram): void
@@ -143,6 +150,29 @@ class TelegramService
                 'text' => (new Notification($document, 'invoice_new_customer', false))->getTelegramBody(),
                 'parse_mode' => 'HTML'
             ]);
+        } finally {
+            $this->telegram->setAccessToken('empty');
+        }
+    }
+
+    /**
+     * @param string $companyBotToken
+     * @param int     $chatId
+     * @return bool
+     * @throws \Telegram\Bot\Exceptions\TelegramSDKException
+     */
+    public function isAccessedChannel(string $companyBotToken, int $chatId): bool
+    {
+        $this->telegram->setAccessToken($companyBotToken);
+        try {
+            return null !== $this->telegram->getChatMember([
+                    'chat_id' => $chatId,
+                    'user_id' => $this->telegram->getMe()->id
+                ]) && $this->telegram->getChat([
+                    'chat_id' => $chatId,
+                ])->type !== 'private';
+        } catch (TelegramResponseException $e) {
+            throw new BadRequestHttpException('Wrong chat_id=' . $chatId . '. Are you sure than you add the bot to this chat?');
         } finally {
             $this->telegram->setAccessToken('empty');
         }
@@ -217,6 +247,7 @@ class TelegramService
                 'currency_code' => 'USD',
                 'website' => $website,
             ]);
+            logger('Created new contact', ['contact' => $user,]);
         }
 
         if (empty($user->telegram_id)) {

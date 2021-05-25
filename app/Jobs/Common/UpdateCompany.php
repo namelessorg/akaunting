@@ -8,6 +8,7 @@ use App\Events\Common\CompanyUpdating;
 use App\Models\Common\Company;
 use App\Services\TelegramService;
 use App\Traits\Users;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class UpdateCompany extends Job
 {
@@ -79,8 +80,32 @@ class UpdateCompany extends Job
                 setting()->set('company.telegram_observer_token', $this->request->get('telegram_observer_token'));
             }
 
+            /** @var TelegramService $telegramService */
+            $telegramService = app(TelegramService::class);
+            if ($this->request->has('telegram_additional_public_channels')) {
+                $publicChannels = trim($this->request->get('telegram_additional_public_channels'));
+                if (!$publicChannels) {
+                    setting()->set('company.telegram_additional_public_channels', '[]');
+                } else {
+                    $publicChannelsRaw = preg_split('/[^\d-]/', $publicChannels);
+                    $verifiedPublicChannels = [];
+                    foreach ($publicChannelsRaw as $channel) {
+                        if (!is_numeric($channel)) {
+                            continue;
+                        }
+                        $channel = trim($channel);
+                        if (!$telegramService->isAccessedChannel(setting('company.telegram_observer_token'), $channel)) {
+                            throw new BadRequestHttpException("Chat#$channel is not a channel/group/supergroup");
+                        }
+                        $verifiedPublicChannels[$channel] = true;
+                    }
+
+                    setting()->set('company.telegram_additional_public_channels', json_encode(array_keys($verifiedPublicChannels), JSON_THROW_ON_ERROR));
+                }
+            }
+
             if ($this->request->get('install_webhook', false)) {
-                app(TelegramService::class)->setWebhook(setting('company.telegram_observer_token'));
+                $telegramService->setWebhook(setting('company.telegram_observer_token'));
             }
 
             if ($this->request->has('currency')) {

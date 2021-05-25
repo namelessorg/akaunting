@@ -29,6 +29,8 @@
 
                     {{ Form::textGroup('telegram_observer_token', 'Telegram observer token', 'paper-plane', ['required' => 'required', 'placeholder' => 'https://api.telegram.org/bot<token>/ only <token> here']) }}
 
+                    {{ Form::textareaGroup('telegram_additional_public_channels', "Telegram public channels id (catch user's invite links)", 'paper-plane') }}
+
                     {{ Form::fileGroup('logo', trans('companies.logo'), '', ['dropzone-class' => 'form-file']) }}
 
                     {{ Form::radioGroup('install_webhook', 'Reinstall telegram webhook', false) }}

@@ -31,7 +31,9 @@
 
                     {{-- Form::textGroup('tax_number', trans('general.tax_number'), 'percent', [], setting('company.tax_number')) --}}
 
-                    {{ Form::numberGroup('telegram_channel_id', 'Telegram channel id', 'paper-plane', ['required' => 'required']) }}
+                    {{ Form::numberGroup('telegram_channel_id', 'Telegram private channel id (paywall for add/kick users)', 'paper-plane', ['required' => 'required']) }}
+
+                    {{ Form::textareaGroup('telegram_additional_public_channels', "Telegram public channels id (catch user's invite links)", 'paper-plane', implode(PHP_EOL, $company->getAvailableChannels(false))) }}
 
                     {{ Form::textGroup('telegram_observer_token', 'Telegram observer token', 'paper-plane', ['required' => 'required', 'placeholder' => 'https://api.telegram.org/bot<token>/']) }}
 

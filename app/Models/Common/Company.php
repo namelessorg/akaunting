@@ -25,7 +25,8 @@ use Lorisleiva\LaravelSearchString\Concerns\SearchString;
  * @property int $id
  * @property string $name
  * @property string $telegram_observer_token
- * @property int $telegram_channel_id
+ * @property int $telegram_channel_id Its private chat with invite-link access
+ * @property array $telegram_additional_public_channels
  * @property Item[] $items
  */
 class Company extends Eloquent
@@ -42,7 +43,7 @@ class Company extends Eloquent
 
     protected $casts = [
         'enabled' => 'boolean',
-        'telegram_channel_id' => 'integer'
+        'telegram_channel_id' => 'integer',
     ];
 
     public $allAttributes = [];
@@ -65,6 +66,21 @@ class Company extends Eloquent
         $this->allAttributes = $attributes;
 
         parent::__construct($attributes);
+    }
+
+    public function getAvailableChannels(bool $withPrivateChat = true): array
+    {
+        $channels = $withPrivateChat ? [
+            $this->telegram_channel_id,
+        ] : [];
+        if (is_string($this->telegram_additional_public_channels)) {
+            $publicChannels = (array)json_decode($this->telegram_additional_public_channels, 1);
+        }
+        if (!empty($publicChannels)) {
+            $channels = array_map('intval', array_merge($channels, $publicChannels));
+        }
+
+        return $channels;
     }
 
     /**

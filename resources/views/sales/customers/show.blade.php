@@ -46,7 +46,7 @@
                 @stack('customer_mt_start')
                 <li class="list-group-item border-0 border-top-1">
                     <div class="font-weight-600">Metatraders id</div>
-                    <div><small class="long-texts" title="{{ $customer->mtString }}">{{ str_replace(PHP_EOL, ', ', trim($customer->mtString)) }}</small></div>
+                    <div><small class="long-texts" title="{{ $customer->mtString }}">{{ str_replace(PHP_EOL, ', ', trim($customer->mtString)) ?: trans('general.na') }}</small></div>
                 </li>
                 @stack('customer_mt_end')
 

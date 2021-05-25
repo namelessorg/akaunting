@@ -75,7 +75,7 @@ class TelegramService
         } else if ($update->isType('chat_member')) {
             if ($company->telegram_channel_id === $update->chatMember->chat->id) {
                 $message = $update->chatMember;
-                $from = $update->chatMember->from;
+                $from = $update->chatMember->newChatMember->user;
                 $id = $from->id;
                 $username = $from->username;
                 $firstName = $from->firstName;
@@ -110,6 +110,14 @@ class TelegramService
         }
 
         return $this->refreshUserByUpdate($company, $id, $username, $firstName, $lastName, $website);
+    }
+
+
+    public function afterMemberUpdateProcessed(Update $update, Api $telegram): void
+    {
+        $contact = $update->getContact();
+        $chat = $update->chatMember;
+        $this->updateContactEnableByStatus($contact, $chat->newChatMember->status ?? null);
     }
 
     public function afterUpdateProcessed(Update $update, Api $telegram): void
@@ -224,5 +232,28 @@ class TelegramService
         $user->save();
 
         return $user;
+    }
+
+    protected function updateContactEnableByStatus(Contact $contact, ?string $status): void
+    {
+        if (null === $status || !is_scalar($status)) {
+            return;
+        }
+        switch ($status) {
+            case 'kicked':
+            case 'left':
+                $contact->enabled = 0;
+                break;
+            case 'member':
+                $contact->enabled = 1;
+                break;
+        }
+
+        $contact->save();
+        logger('Update contact state by telegram public channel status', [
+            'contact' => $contact->id,
+            'status' => $status,
+            'enable' => (int)$contact->enabled,
+        ]);
     }
 }

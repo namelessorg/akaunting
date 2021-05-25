@@ -50,6 +50,13 @@
                 </li>
                 @stack('customer_mt_end')
 
+                @stack('customer_website_start')
+                <li class="list-group-item border-0 border-top-1">
+                    <div class="font-weight-600">Joined by referral link</div>
+                    <div><small class="long-texts" title="{{ $customer->website }}">{{ $customer->website ?: trans('general.na') }}</small></div>
+                </li>
+                @stack('customer_website_end')
+
                 @stack('customer_expiration_start')
                 <li class="list-group-item border-0 border-top-1">
                     <div class="font-weight-600">Expires at</div>

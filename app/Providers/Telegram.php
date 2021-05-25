@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use Illuminate\Console\Application as Artisan;
-use Illuminate\Console\Command;
+use App\Lib\Telegram\TelegramApi;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider as Provider;
@@ -19,18 +18,19 @@ class Telegram extends Provider implements DeferrableProvider
     public function provides()
     {
         return [
-            Api::class,
+            Api::class, TelegramApi::class,
         ];
     }
 
     public function register()
     {
-        $this->app->singleton(Api::class, function() {
-            $api = new Api('empty');
+        $this->app->singleton(TelegramApi::class, function() {
+            $api = new TelegramApi('empty');
             $api->addCommands($this->loadTelegramCommands(app_path('Console/Telegram')));
 
             return $api;
         });
+        $this->app->bind(Api::class, TelegramApi::class);
     }
 
 

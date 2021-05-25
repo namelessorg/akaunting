@@ -4,9 +4,16 @@ declare(strict_types=1);
 
 namespace App\Lib\Telegram;
 
+use App\Lib\Telegram\Models\ChatMemberUpdated;
 use App\Models\Common\Contact;
 use Telegram\Bot\Objects\Update as BaseUpdate;
 
+/**
+ * Class Update
+ *
+ * @package App\Lib\Telegram
+ * @property ChatMemberUpdated $chatMember
+ */
 class Update extends BaseUpdate
 {
     /**
@@ -15,6 +22,16 @@ class Update extends BaseUpdate
     protected $contact;
 
     protected $isProcessed = false;
+
+    public function relations()
+    {
+        return array_replace(
+            parent::relations(),
+            [
+                'chat_member' => ChatMemberUpdated::class,
+            ],
+        );
+    }
 
     /**
      * @param Contact $contact

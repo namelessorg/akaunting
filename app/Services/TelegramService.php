@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Lib\Telegram\Models\ChatLink;
 use App\Lib\Telegram\Update;
 use App\Models\Common\Company;
 use App\Models\Common\Contact;
 use App\Models\Document\Document;
 use App\Notifications\Sale\Invoice as Notification;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Carbon;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Telegram\Bot\Api;
 use Telegram\Bot\Exceptions\TelegramResponseException;
@@ -36,7 +38,7 @@ class TelegramService
         $this->telegram->setAccessToken($companyBotToken);
         if (!$this->telegram->setWebhook([
             'url' => route('webhook_url', ['token' => $companyBotToken,], true),
-            'allowed_updates' => ['message'],
+            'allowed_updates' => json_encode(['message', 'callback_query', 'chat_member']),
         ])) {
             $response = $this->telegram->getLastResponse();
             if ($response && $response->isError()) {
@@ -47,34 +49,54 @@ class TelegramService
                 'Unable to setup a webhook'
             );
         }
+
+        logger('Reinstall webhook for token ' . substr($companyBotToken, 0, 15) . '<...>', [
+            'webhook_info' => $this->telegram->getWebhookInfo()
+        ]);
     }
 
-    public function extractContactFromMessage(Company $company, UpdateObject $update): ?Contact
+    public function extractContactFromMessage(Company $company, Update $update): ?Contact
     {
         $company->makeCurrent();
-        switch ($update->detectType()) {
-            case 'callback_query':
-                $message = $update->callbackQuery;
-                $id = $message->from->id;
-                $username = $message->from->username;
-                $firstName = $message->from->firstName;
-                $lastName = $message->from->lastName;
-                break;
-            case 'message':
-                $message = $update->getMessage();
-                $id = $message->from->id;
-                $username = $message->from->username;
-                $firstName = $message->from->firstName;
-                $lastName = $message->from->lastName;
-                break;
-            default:
-                logger('Undefined update state `'.$update->detectType().'`', [
+        $website = null;
+
+        if ($update->isType('callback_query')) {
+            $message = $update->callbackQuery;
+            $id = $message->from->id;
+            $username = $message->from->username;
+            $firstName = $message->from->firstName;
+            $lastName = $message->from->lastName;
+        } else if ($update->isType('message')) {
+            $message = $update->getMessage();
+            $id = $message->from->id;
+            $username = $message->from->username;
+            $firstName = $message->from->firstName;
+            $lastName = $message->from->lastName;
+        } else if ($update->isType('chat_member')) {
+            if ($company->telegram_channel_id === $update->chatMember->chat->id) {
+                $message = $update->chatMember;
+                $from = $update->chatMember->from;
+                $id = $from->id;
+                $username = $from->username;
+                $firstName = $from->firstName;
+                $lastName = $from->lastName;
+                $website = $message->inviteLink instanceof ChatLink ? $message->inviteLink->inviteLink : null;
+            } else {
+                logger('Got event chat_member from unobserved chat_id', [
                     'update' => $update->toArray(),
+                    'expected_chat_id' => $company->telegram_channel_id,
+                    'actual_chat_id' => $update->chatMember->chat->id
                 ]);
                 return null;
+            }
+        } else {
+            logger('Undefined update state `' . $update->detectType() . '`', [
+                'update' => $update->toArray(),
+            ]);
+            return null;
         }
 
-        return $this->refreshUserByUpdate($company, $id, $username, $firstName, $lastName);
+        return $this->refreshUserByUpdate($company, $id, $username, $firstName, $lastName, $website);
     }
 
     public function afterUpdateProcessed(Update $update, Api $telegram): void
@@ -117,9 +139,16 @@ class TelegramService
             } catch (TelegramResponseException $e) {
                 logger('Error on add user ' . $e->getMessage(), ['customer' => $user->id, 'e' => $e,]);
             }
+
+            /** @var ChatLink $accessLink */
+            $accessLink = $this->telegram->createChatInviteLink(
+                $company->telegram_channel_id,
+                1,
+                (new \DateTime('now +1 week'))->getTimestamp()
+            );
             $this->telegram->sendMessage([
                 'chat_id' => $user->telegram_chat_id,
-                'text' => trim($additionalText . "\r\n\r\nInvite access link: " . $this->telegram->exportChatInviteLink(['chat_id' => $company->telegram_channel_id]))
+                'text' => trim($additionalText . "\r\n\r\nInvite access link: " . $accessLink->inviteLink)
             ]);
 
             return true;
@@ -148,7 +177,7 @@ class TelegramService
         }
     }
 
-    public function refreshUserByUpdate(Company $company, int $id, ?string $username, ?string $firstName, ?string $lastName): Contact
+    public function refreshUserByUpdate(Company $company, int $id, ?string $username, ?string $firstName, ?string $lastName, ?string $website = null): Contact
     {
         /** @var Contact $user */
         $user = $company->customers()->whereNested(function (Builder $builder) use ($id, $username) {
@@ -164,7 +193,8 @@ class TelegramService
                 'expired_at' => now(),
                 'company_id' => $company->id,
                 'type' => 'customer',
-                'currency_code' => 'USD'
+                'currency_code' => 'USD',
+                'website' => $website,
             ]);
         }
 

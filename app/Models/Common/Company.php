@@ -42,6 +42,7 @@ class Company extends Eloquent
 
     protected $casts = [
         'enabled' => 'boolean',
+        'telegram_channel_id' => 'integer'
     ];
 
     public $allAttributes = [];

@@ -82,10 +82,23 @@ class TelegramService
                 $lastName = $from->lastName;
                 $website = $message->inviteLink instanceof ChatLink ? $message->inviteLink->inviteLink : null;
             } else {
-                logger('Got event chat_member from unobserved chat_id', [
+                $e = null;
+                try {
+                    $this->telegram->sendMessage([
+                        'chat_id' => $update->chatMember->chat->id,
+                        'text' => 'Sorry, but this chat_id "' . $update->chatMember->chat->id . '" is unexpected',
+                    ]);
+                } catch (\Throwable $e) {}
+                try {
+                    $this->telegram->leaveChat([
+                        'chat_id' => $update->chatMember->chat->id,
+                    ]);
+                } catch (\Throwable $e) {}
+                logger('Got event chat_member from unobserved chat_id => leave the chat', [
                     'update' => $update->toArray(),
                     'expected_chat_id' => $company->telegram_channel_id,
-                    'actual_chat_id' => $update->chatMember->chat->id
+                    'actual_chat_id' => $update->chatMember->chat->id,
+                    'e' => $e,
                 ]);
                 return null;
             }

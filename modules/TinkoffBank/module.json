@@ -1,6 +1,6 @@
 {
-    "alias": "paypal-standard",
-    "icon": "fab fa-paypal",
+    "alias": "tinkoff-bank",
+    "icon": "fab fa-dollar-sign",
     "version": "2.0.0",
     "active": 1,
     "providers": [
@@ -26,7 +26,7 @@
         {
             "type": "textGroup",
             "name": "email",
-            "title": "paypal-standard::general.form.email",
+            "title": "tinkoff-bank::general.form.email",
             "icon": "envelope",
             "attributes": {
                 "required": "required"
@@ -36,7 +36,7 @@
         {
             "type": "selectGroup",
             "name": "mode",
-            "title": "paypal-standard::general.form.mode",
+            "title": "tinkoff-bank::general.form.mode",
             "icon": "plane",
             "values": {
                 "live": "Live",
@@ -51,7 +51,7 @@
         {
             "type": "selectGroup",
             "name": "transaction",
-            "title": "paypal-standard::general.form.transaction",
+            "title": "tinkoff-bank::general.form.transaction",
             "icon": "exchange-alt",
             "values": {
                 "authorization": "Authorization",
@@ -74,7 +74,7 @@
         {
             "type": "textGroup",
             "name": "order",
-            "title": "paypal-standard::general.form.order",
+            "title": "tinkoff-bank::general.form.order",
             "icon": "sort",
             "attributes": {},
             "rules": "nullable|integer"
@@ -82,7 +82,7 @@
         {
             "type": "radioGroup",
             "name": "customer",
-            "title": "paypal-standard::general.form.customer",
+            "title": "tinkoff-bank::general.form.customer",
             "enable": "general.yes",
             "disable": "general.no",
             "attributes": {},
@@ -91,7 +91,7 @@
         {
             "type": "radioGroup",
             "name": "debug",
-            "title": "paypal-standard::general.form.debug",
+            "title": "tinkoff-bank::general.form.debug",
             "enable": "general.yes",
             "disable": "general.no",
             "attributes": {},

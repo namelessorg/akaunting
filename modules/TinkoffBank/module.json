@@ -4,8 +4,8 @@
     "version": "2.0.0",
     "active": 1,
     "providers": [
-        "Modules\\PaypalStandard\\Providers\\Event",
-        "Modules\\PaypalStandard\\Providers\\Main"
+        "Modules\\TinkoffBank\\Providers\\Event",
+        "Modules\\TinkoffBank\\Providers\\Main"
     ],
     "aliases": {},
     "files": [],

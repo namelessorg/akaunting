@@ -17,6 +17,7 @@ class ShowAsPaymentMethod
         $method = setting('tinkoff-bank');
 
         $method['code'] = 'tinkoff-bank';
+        $method['name'] = 'Tinkoff Bank';
 
         $event->modules->payment_methods[] = $method;
     }

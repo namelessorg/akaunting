@@ -72,6 +72,7 @@ class TelegramService
         } else if ($update->isType('message')) {
             $message = $update->getMessage();
             $chat = $update->getChat();
+            // случай группового сообщения о том, что чел вступил в группу
             if (isset($message->newChatMembers[0]) && $newMember = $message->newChatMembers[0]) {
                 $newMember = new User($newMember);
                 $id = $newMember->id;

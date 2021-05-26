@@ -71,11 +71,13 @@ class Webhook extends Controller
             }
 
             $update->setContact($contact);
-            if ($update->isType('message') || $update->isType('callbackQuery')) {
+            if ($update->isType('message') || $update->isType('callback_query')) {
                 $this->telegram->processCommand($update);
                 $this->telegramService->afterUpdateProcessed($update, $this->telegram);
             } else if ($update->isType('chat_member')) {
                 $this->telegramService->afterMemberUpdateProcessed($update, $this->telegram);
+            } else {
+                logger('Undefined message action');
             }
         } finally {
             $this->telegram->setAccessToken('empty');

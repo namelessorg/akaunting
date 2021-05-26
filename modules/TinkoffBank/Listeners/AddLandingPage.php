@@ -14,6 +14,6 @@ class AddLandingPage
      */
     public function handle(Event $event)
     {
-        $event->user->landing_pages['paypal-standard.settings.edit'] = trans('paypal-standard::general.name');
+        $event->user->landing_pages['tinkoff-bank.settings.edit'] = trans('tinkoff-bank::general.name');
     }
 }

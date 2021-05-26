@@ -14,9 +14,9 @@ class ShowAsPaymentMethod
      */
     public function handle(Event $event)
     {
-        $method = setting('paypal-standard');
+        $method = setting('tinkoff-bank');
 
-        $method['code'] = 'paypal-standard';
+        $method['code'] = 'tinkoff-bank';
 
         $event->modules->payment_methods[] = $method;
     }

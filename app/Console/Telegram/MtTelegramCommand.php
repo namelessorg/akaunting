@@ -21,7 +21,7 @@ class MtTelegramCommand extends AbstractTelegramCommand
             return;
         }
 
-        if (!$update->message->text) {
+        if (!$update->message || !$update->message->text) {
             return;
         }
         if ($update->message->hasCommand()) {

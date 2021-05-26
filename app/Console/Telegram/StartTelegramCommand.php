@@ -78,9 +78,6 @@ class StartTelegramCommand extends AbstractTelegramCommand
         if (!empty($contact->utm) || !is_scalar($utm) || empty($utm)) {
             return;
         }
-        if ($contact->created_at instanceof CarbonInterface && $contact->created_at->diffInDays(now()) >= self::DAYS_FOR_UTM_ACCESS) {
-            return;
-        }
 
         $contact->utm = $utm;
         try {

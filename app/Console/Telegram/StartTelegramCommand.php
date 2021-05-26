@@ -6,10 +6,13 @@ namespace App\Console\Telegram;
 
 use App\Lib\Telegram\Update;
 use App\Models\Common\Contact;
+use Carbon\CarbonInterface;
 use Telegram\Bot\Keyboard\Keyboard;
 
 class StartTelegramCommand extends AbstractTelegramCommand
 {
+    public const DAYS_FOR_UTM_ACCESS = 7;
+
     /**
      * @var string Command Name
      */
@@ -72,7 +75,10 @@ class StartTelegramCommand extends AbstractTelegramCommand
 
     protected function insertUtm(Contact $contact, $utm)
     {
-        if (!$contact->wasRecentlyCreated || !is_scalar($utm) || empty($utm)) {
+        if (!empty($contact->utm) || !is_scalar($utm) || empty($utm)) {
+            return;
+        }
+        if ($contact->created_at instanceof CarbonInterface && $contact->created_at->diffInDays(now()) >= self::DAYS_FOR_UTM_ACCESS) {
             return;
         }
 

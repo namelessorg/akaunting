@@ -33,6 +33,7 @@ use Illuminate\Notifications\Notifiable;
  * @property User|null $user
  * @property int $telegram_chat_id
  * @property CarbonInterface $updated_at
+ * @property CarbonInterface $created_at
  * @method Builder activeContacts
  */
 class Contact extends Model

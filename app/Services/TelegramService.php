@@ -85,14 +85,14 @@ class TelegramService
                 $firstName = $message->from->firstName;
                 $lastName = $message->from->lastName;
             }
-        } else if ($update->isType('chat_member')) {
+        } else if ($update->isType('chat_member') && !in_array($update->chatMember->newChatMember->status, ['left', 'kicked'])) {
             $chat = $update->chatMember->chat;
             $from = $update->chatMember->newChatMember->user;
             $id = $from->id;
             $username = $from->username;
             $firstName = $from->firstName;
             $lastName = $from->lastName;
-            $website = $update->chatMember->inviteLink instanceof ChatLink ? $update->chatMember->inviteLink->inviteLink : null;
+            $website = $update->chatMember->inviteLink->inviteLink ?? null;
         } else {
             logger('Undefined update state `' . $update->detectType() . '`', [
                 'update' => $update->toArray(),

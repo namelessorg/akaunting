@@ -77,6 +77,7 @@ class SubscribeTelegramCommand extends AbstractTelegramCommand
             ]],
             'item_backup' => [$item->attributesToArray(),],
             'document_number' => $this->getNextDocumentNumber(Document::INVOICE_TYPE),
+            'footer' => setting('invoice.footer'),
         ]));
 
         app(TelegramService::class)->sendInvoice($invoice, $contact);

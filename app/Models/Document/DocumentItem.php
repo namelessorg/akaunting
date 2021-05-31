@@ -9,6 +9,16 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Class DocumentItem
+ *
+ * @package App\Models\Document
+ * @property string $name
+ * @property int $quantity
+ * @property float $price
+ * @property float $total
+ * @property float $tax
+ */
 class DocumentItem extends Model
 {
     use Cloneable, Currencies;

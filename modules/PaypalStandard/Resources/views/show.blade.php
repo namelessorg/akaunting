@@ -30,10 +30,9 @@
                 <input type="hidden" name="currency_code" value="{{ $invoice->currency_code}}" />
                 <input type="hidden" name="first_name" value="{{ $invoice->first_name }}" />
                 <input type="hidden" name="last_name" value="{{ $invoice->last_name }}" />
-                <input type="hidden" name="address1" value="{{ $invoice->customer_address }}" />
+                <input type="hidden" name="address1" value="{{ $invoice->contact_address ?? $invoice->company->address }}" />
                 <input type="hidden" name="address_override" value="0" />
-                <input type="hidden" name="email" value="{{ $invoice->customer_email }}" />
-                <input type="hidden" name="invoice" value="{{ $invoice->id . '-' . $invoice->customer_name }}" />
+                <input type="hidden" name="invoice" value="{{ $invoice->id }}" />
                 <input type="hidden" name="lc" value="{{ $setting['language'] }}" />
                 <input type="hidden" name="rm" value="2" />
                 <input type="hidden" name="no_note" value="1" />
@@ -44,7 +43,7 @@
                 <input type="hidden" name="cancel_return" value="{{ $invoice_url }}" />
                 <input type="hidden" name="paymentaction" value="{{ $setting['transaction'] }}" />
                 <input type="hidden" name="custom" value="{{ $invoice->id }}" />
-                <input type="hidden" name="bn" value="{{preg_replace('/([^[a-z0-9])/i', '-', $invoice->company->name??'smthn_spcl')}}" />
+                <input type="hidden" name="hosted_button_id" value="{{preg_replace('/([^[a-z0-9])/i', '-', $invoice->company->name??'smthn_spcl')}}" />
 
                 <input type="submit" value="{{ trans('general.pay') }}" class="btn btn-success" />
             </form>

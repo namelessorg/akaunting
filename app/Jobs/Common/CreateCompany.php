@@ -6,10 +6,13 @@ use App\Abstracts\Job;
 use App\Events\Common\CompanyCreated;
 use App\Events\Common\CompanyCreating;
 use App\Models\Common\Company;
+use App\Services\TelegramService;
 use Artisan;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class CreateCompany extends Job
 {
+    /** @var Company */
     protected $company;
 
     protected $request;
@@ -39,6 +42,44 @@ class CreateCompany extends Job
             $this->company = Company::create($this->request->all());
 
             $this->company->makeCurrent();
+
+            if ($this->request->has('telegram_channel_id')) {
+                setting()->set('company.telegram_channel_id', $this->request->get('telegram_channel_id'));
+            }
+
+            if ($this->request->has('telegram_observer_token')) {
+                setting()->set('company.telegram_observer_token', $this->request->get('telegram_observer_token'));
+            }
+
+            /** @var TelegramService $telegramService */
+            $telegramService = app(TelegramService::class);
+            if ($this->request->has('telegram_additional_public_channels')) {
+                $publicChannels = trim($this->request->get('telegram_additional_public_channels'));
+                if (!$publicChannels) {
+                    setting()->set('company.telegram_additional_public_channels', '[]');
+                } else {
+                    $publicChannelsRaw = preg_split('/[^\d-]/', $publicChannels);
+                    $verifiedPublicChannels = [];
+                    foreach ($publicChannelsRaw as $channel) {
+                        if (!is_numeric($channel)) {
+                            continue;
+                        }
+                        $channel = trim($channel);
+                        if (!$telegramService->isAccessedChannel(setting('company.telegram_observer_token'), $channel)) {
+                            throw new BadRequestHttpException("Chat#$channel is not a channel/group/supergroup");
+                        }
+                        $verifiedPublicChannels[$channel] = true;
+                    }
+
+                    setting()->set('company.telegram_additional_public_channels', json_encode(array_keys($verifiedPublicChannels), JSON_THROW_ON_ERROR));
+                }
+            }
+
+            setting()->set('wizard.completed', 1);
+
+            $telegramService->setWebhook(setting('company.telegram_observer_token'), $this->company->id);
+
+            setting()->save();
 
             $this->callSeeds();
 

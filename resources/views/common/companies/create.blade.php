@@ -33,8 +33,6 @@
 
                     {{ Form::fileGroup('logo', trans('companies.logo'), '', ['dropzone-class' => 'form-file']) }}
 
-                    {{ Form::radioGroup('install_webhook', 'Reinstall telegram webhook', false) }}
-
                     {{ Form::radioGroup('enabled', trans('general.enabled'), true) }}
                 </div>
             </div>

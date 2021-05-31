@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\CurrenciesService;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Schema;
@@ -24,6 +25,8 @@ class App extends Provider
         if (config('app.env') !== 'production') {
             $this->app->register(\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);
         }
+
+        $this->app->singleton(CurrenciesService::class);
 
         if (config('app.log_all_database_queries')) {
             \DB::listen(function (QueryExecuted $query) {

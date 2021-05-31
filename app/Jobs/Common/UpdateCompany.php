@@ -105,7 +105,7 @@ class UpdateCompany extends Job
             }
 
             if ($this->request->get('install_webhook', false)) {
-                $telegramService->setWebhook(setting('company.telegram_observer_token'));
+                $telegramService->setWebhook(setting('company.telegram_observer_token'), $this->company->id);
             }
 
             if ($this->request->has('currency')) {
@@ -126,7 +126,10 @@ class UpdateCompany extends Job
                 }
             }
 
+            setting()->set('wizard.completed', 1);
+
             setting()->save();
+
         });
 
         event(new CompanyUpdated($this->company, $this->request));

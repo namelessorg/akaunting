@@ -41,7 +41,7 @@
 
                     {{ Form::radioGroup('enabled', trans('general.enabled'), $company->enabled) }}
 
-                    {{ Form::radioGroup('install_webhook', 'Reinstall telegram webhook', false) }}
+                    {{ Form::radioGroup('install_webhook', 'Reinstall telegram webhook', true) }}
 
                 </div>
             </div>

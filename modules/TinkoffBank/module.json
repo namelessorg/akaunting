@@ -1,6 +1,6 @@
 {
     "alias": "tinkoff-bank",
-    "icon": "fab fa-dollar-sign",
+    "icon": "fas fa-credit-card",
     "version": "2.0.0",
     "active": 1,
     "providers": [
@@ -25,24 +25,19 @@
         },
         {
             "type": "textGroup",
-            "name": "email",
-            "title": "tinkoff-bank::general.form.email",
-            "icon": "envelope",
+            "name": "terminal_key",
+            "title": "tinkoff-bank::general.form.terminal_key",
+            "icon": "cash-register",
             "attributes": {
                 "required": "required"
             },
-            "rules": "required|email"
+            "rules": "required|string"
         },
         {
-            "type": "selectGroup",
-            "name": "mode",
-            "title": "tinkoff-bank::general.form.mode",
-            "icon": "plane",
-            "values": {
-                "live": "Live",
-                "sandbox": "Sandbox"
-            },
-            "selected": "live",
+            "type": "textGroup",
+            "name": "secret_key",
+            "title": "tinkoff-bank::general.form.secret_key",
+            "icon": "key",
             "attributes": {
                 "required": "required"
             },
@@ -50,14 +45,18 @@
         },
         {
             "type": "selectGroup",
-            "name": "transaction",
-            "title": "tinkoff-bank::general.form.transaction",
-            "icon": "exchange-alt",
+            "name": "taxation",
+            "title": "tinkoff-bank::general.form.taxation",
+            "icon": "plane",
             "values": {
-                "authorization": "Authorization",
-                "sale": "Sale"
+                "osn": "General taxation scheme",
+                "usn_income": "USN income",
+                "usn_income_outcome": "USN income-outcome",
+                "patent": "Patent",
+                "envd": "ENVD",
+                "esn": "ESN"
             },
-            "selected": "sale",
+            "selected": "osn",
             "attributes": {
                 "required": "required"
             },

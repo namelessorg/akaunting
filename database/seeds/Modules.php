@@ -37,5 +37,11 @@ class Modules extends Seeder
             'company'   => $company_id,
             'locale'    => session('locale', app()->getLocale()),
         ]);
+
+        Artisan::call('module:install', [
+            'alias'     => 'tinkoff-bank',
+            'company'   => $company_id,
+            'locale'    => session('locale', app()->getLocale()),
+        ]);
     }
 }

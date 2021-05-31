@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
  */
 
 Route::portal('tinkoff-bank', function () {
-    Route::get('invoices/{invoice}/complete', 'Payment@return')->name('invoices.return');
-    Route::post('invoices/{invoice}/complete', 'Payment@complete')->name('invoices.complete');
+    Route::get('invoices/{invoice}/fail', 'Payment@fail')->name('invoices.fail');
+    Route::get('invoices/{invoice}/success', 'Payment@success')->name('invoices.success');
+    Route::any('invoices/{invoice}/notify', 'Payment@complete')->name('invoices.complete');
 }, ['middleware' => 'guest']);

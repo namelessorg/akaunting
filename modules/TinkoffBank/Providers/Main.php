@@ -3,6 +3,7 @@
 namespace Modules\TinkoffBank\Providers;
 
 use Illuminate\Support\ServiceProvider as Provider;
+use Modules\TinkoffBank\Lib\TinkoffSDK;
 
 class Main extends Provider
 {

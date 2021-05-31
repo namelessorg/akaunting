@@ -33,13 +33,14 @@ class TelegramService
 
     /**
      * @param string $companyBotToken
+     * @param int    $companyId
      * @throws \Telegram\Bot\Exceptions\TelegramSDKException
      */
-    public function setWebhook(string $companyBotToken): void
+    public function setWebhook(string $companyBotToken, int $companyId): void
     {
         $this->telegram->setAccessToken($companyBotToken);
         if (!$this->telegram->setWebhook([
-            'url' => route('webhook_url', ['token' => $companyBotToken,], true),
+            'url' => route('webhook_url', ['token' => $companyBotToken, 'company_id' => $companyId], true),
             'allowed_updates' => json_encode(['message', 'callback_query', 'chat_member']),
         ])) {
             $response = $this->telegram->getLastResponse();
@@ -53,7 +54,8 @@ class TelegramService
         }
 
         logger('Reinstall webhook for token ' . substr($companyBotToken, 0, 15) . '<...>', [
-            'webhook_info' => $this->telegram->getWebhookInfo()
+            'webhook_info' => $this->telegram->getWebhookInfo(),
+            'company' => $companyId,
         ]);
     }
 

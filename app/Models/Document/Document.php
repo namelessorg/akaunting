@@ -27,6 +27,10 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property Carbon $due_at
  * @property string $type
+ * @property string $document_number
+ * @property string $currency_code
+ * @property string $contact_email
+ * @property string $order_number
  * @property-read Contact $contact
  * @property-read Company $company
  * @method static notPaid

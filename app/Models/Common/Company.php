@@ -24,6 +24,7 @@ use Lorisleiva\LaravelSearchString\Concerns\SearchString;
  * @property bool $enabled
  * @property int $id
  * @property string $name
+ * @property string $email
  * @property string $telegram_observer_token
  * @property int $telegram_channel_id Its private chat with invite-link access
  * @property array $telegram_additional_public_channels

@@ -40,20 +40,22 @@ class Webhook extends Controller
         $this->logger->debug('Incoming request', [
             'data' => $request->all(),
             'client_ip' => $request->ip(),
+            'company' => $companyId->id,
         ]);
 
         $companyId->makeCurrent(true);
-        $companyBotToken = setting('company.telegram_observer_token');
+        $companyBotToken = $companyId->telegram_observer_token;
         if (!$companyId->enabled) {
             $this->logger->debug('Received message on disabled company', [
                 'input' => file_get_contents('php://input'),
             ]);
             return;
         }
-        if (!hash_equals($token, $companyBotToken)) {
+        if (!$token || !$companyBotToken || !hash_equals($token, $companyBotToken)) {
             $this->logger->warning('Unexpected observer token', [
                 'expected' => $companyBotToken,
                 'actual' => $token,
+                'company' => $companyId->id
             ]);
             return;
         }

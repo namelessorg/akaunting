@@ -18,7 +18,7 @@ class ShowInSettingsPage
             'name' => trans('offline-payments::general.name'),
             'description' => trans('offline-payments::general.description'),
             'url' => route('offline-payments.settings.edit'),
-            'icon' => 'fas fa-credit-card',
+            'icon' => 'fas fa-wallet',
         ];
     }
 }

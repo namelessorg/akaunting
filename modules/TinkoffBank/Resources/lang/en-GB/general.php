@@ -6,12 +6,14 @@ return [
     'description'       => 'Enable the standard payment option of Tinkoff',
 
     'form' => [
-        'email'         => 'Email',
-        'mode'          => 'Mode',
-        'debug'         => 'Debug',
-        'transaction'   => 'Transaction',
-        'customer'      => 'Show to Customer',
-        'order'         => 'Order',
+        'terminal_key' => 'Terminal key',
+        'secret_key' => 'Secret key',
+        'mode' => 'Mode',
+        'taxation' => 'Taxation scheme',
+        'debug' => 'Debug',
+        'transaction' => 'Transaction',
+        'customer' => 'Show to Customer',
+        'order' => 'Order',
     ],
 
     'test_mode'         => 'Warning: The payment gateway is in \'Sandbox Mode\'. Your account will not be charged.',

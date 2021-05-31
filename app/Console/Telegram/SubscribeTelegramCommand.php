@@ -35,6 +35,15 @@ class SubscribeTelegramCommand extends AbstractTelegramCommand
     public function run(Contact $contact, Update $update): void
     {
         $id = explode(' ', ltrim($this->getUpdate()->callbackQuery->data, '/'))[1] ?? null;
+
+        try {
+            $this->telegram->answerCallbackQuery([
+                'callback_query_id' => $this->getUpdate()->callbackQuery->id,
+            ]);
+        } catch (TelegramResponseException $e) {
+            // do nothing by default
+        }
+
         /** @var Item $item */
         if (null === $id || !$item = Item::find($id)) {
             $this->triggerCommand('start');
@@ -71,14 +80,6 @@ class SubscribeTelegramCommand extends AbstractTelegramCommand
         ]));
 
         app(TelegramService::class)->sendInvoice($invoice, $contact);
-
-        try {
-            $this->telegram->answerCallbackQuery([
-                'callback_query_id' => $this->getUpdate()->callbackQuery->id,
-            ]);
-        } catch (TelegramResponseException $e) {
-            // do nothing by default
-        }
     }
 
     public function __destruct()

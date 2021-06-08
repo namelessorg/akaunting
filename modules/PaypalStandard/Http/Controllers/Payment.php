@@ -85,7 +85,7 @@ class Payment extends PaymentController
 
         $url = ($setting['mode'] == 'live') ? 'https://ipnpb.paypal.com/cgi-bin/webscr' : 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 
-        $client = new Client(['verify' => false]);
+        $client = new Client();
 
         $paypal_request['cmd'] = '_notify-validate';
 
@@ -105,7 +105,7 @@ class Payment extends PaymentController
             $paypal_log->info('PAYPAL_STANDARD :: IPN REQUEST: ', $request->toArray());
         }
 
-        if ((strcmp($response, 'VERIFIED') != 0 || strcmp($response, 'UNVERIFIED') != 0)) {
+        if ((strcmp($response, 'VERIFIED') !== 0 || strcmp($response, 'UNVERIFIED') != 0)) {
             $paypal_log->info('PAYPAL_STANDARD :: VERIFIED != 0 || UNVERIFIED != 0 ' . $request->toArray());
 
             return;
@@ -113,7 +113,7 @@ class Payment extends PaymentController
 
         switch ($request['payment_status']) {
             case 'Completed':
-                $receiver_match = (strtolower($request['receiver_email']) == strtolower($setting['email']));
+                $receiver_match = (strtolower($request['receiver_email']) === strtolower($setting['email']));
 
                 $total_paid_match = ((double) $request['mc_gross'] == $invoice->amount);
 

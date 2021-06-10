@@ -115,11 +115,9 @@ abstract class PaymentController extends BaseController
         ]);
     }
 
-    public function getInvoiceUrl($invoice)
+    public function getInvoiceUrl(Document $invoice)
     {
-        return request()->isPortal($invoice->company_id)
-                ? route('portal.invoices.show', $invoice->id)
-                : URL::signedRoute('signed.invoices.show', [$invoice->id]);
+        return URL::signedRoute('signed.invoices.show', ['invoice' => $invoice->id, 'company_id' => $invoice->company_id,]);
     }
 
     public function getConfirmUrl($invoice)

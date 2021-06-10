@@ -51,13 +51,14 @@ class Route extends Provider
                 $attributes['namespace'] = 'Modules\\' . module($alias)->getStudlyName() . '\Http\Controllers';
             }
 
+            $prefix = !empty($attrs['no_company']) ? '' : '{company_id}/';
             if (isset($attrs['prefix'])) {
                 // null means don't add
                 if (!is_null($attrs['prefix'])) {
-                    $attributes['prefix'] = '{company_id}/' . $attrs['prefix'];
+                    $attributes['prefix'] = $prefix . $attrs['prefix'];
                 }
             } else {
-                $attributes['prefix'] = '{company_id}/' . $alias;
+                $attributes['prefix'] = $prefix. $alias;
             }
 
             if (isset($attrs['as'])) {

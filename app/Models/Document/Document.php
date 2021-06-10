@@ -15,6 +15,7 @@ use App\Traits\Media;
 use App\Traits\Recurring;
 use Bkwld\Cloner\Cloneable;
 use Database\Factories\Document as DocumentFactory;
+use Doctrine\Common\Collections\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @property string $currency_code
  * @property string $contact_email
  * @property string $order_number
+ * @property int $company_id
  * @property-read Contact $contact
  * @property-read Company $company
  * @method static notPaid

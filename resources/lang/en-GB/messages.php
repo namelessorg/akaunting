@@ -4,6 +4,7 @@ return [
 
     'success' => [
         'added'             => ':type added!',
+        'success'           => ':type success! :type processing may take several time, please wait',
         'updated'           => ':type updated!',
         'deleted'           => ':type deleted!',
         'duplicated'        => ':type duplicated!',
@@ -17,6 +18,7 @@ return [
 
     'error' => [
         'added'             => 'Error: :type cancelled by user',
+        'payment_cancelled' => 'Error: :type cancelled by bank. Please, make sure than you have enough balance on card',
         'over_payment'      => 'Error: Payment not added! The amount you entered passes the total: :amount',
         'not_user_company'  => 'Error: You are not allowed to manage this company!',
         'customer'          => 'Error: User not created! :name already uses this email address.',

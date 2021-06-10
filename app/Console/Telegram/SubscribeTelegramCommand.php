@@ -51,7 +51,7 @@ class SubscribeTelegramCommand extends AbstractTelegramCommand
         }
 
         $contact->company->makeCurrent();
-        $invoicesToday = $contact->invoices()->where('created_at', '>', Carbon::yesterday())->where('created_at', '<', Carbon::now())->count();
+        $invoicesToday = $contact->invoices()->where('created_at', '>', Carbon::yesterday())->where('created_at', '<', Carbon::now())->whereNotIn('status', ['paid', 'cancelled'])->count();
         if ($invoicesToday > self::INVOICES_PER_DAY_LIMIT) {
             logger('Too many invoices');
             return;

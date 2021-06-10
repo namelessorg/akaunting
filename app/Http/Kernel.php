@@ -61,7 +61,11 @@ class Kernel extends HttpKernel
 
         'guest' => [
             'web',
-            'auth.redirect',
+        ],
+
+        'payment' => [
+            'bindings',
+            'firewall.all',
         ],
 
         'admin' => [

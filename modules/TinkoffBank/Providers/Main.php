@@ -63,6 +63,7 @@ class Main extends Provider
             'guest.php',
             'portal.php',
             'signed.php',
+            'web.php',
         ];
 
         foreach ($routes as $route) {

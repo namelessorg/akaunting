@@ -3,19 +3,19 @@
 namespace Modules\TinkoffBank\Http\Controllers;
 
 use App\Abstracts\Http\PaymentController;
+use App\Events\Document\DocumentCancelled;
 use App\Events\Document\PaymentReceived;
 use App\Http\Requests\Portal\InvoicePayment as PaymentRequest;
 use App\Models\Common\Company;
-use App\Models\Common\Item;
 use App\Models\Document\Document;
 use App\Models\Document\DocumentItem;
+use App\Scopes\Company as CompanyScope;
 use App\Services\CurrenciesService;
-use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\URL;
 use Modules\TinkoffBank\Lib\TinkoffSDK;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
-use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Payment extends PaymentController
 {
@@ -43,31 +43,27 @@ class Payment extends PaymentController
             ]);
         }
 
-        $this->setContactFirstLastName($invoice);
-
         $initParams = [
             'OrderId' => $invoice->id,
-            'SuccessURL' => route('portal.tinkoff-bank.invoices.success', $invoice->id),
-            'FailURL' => route('portal.tinkoff-bank.invoices.fail', $invoice->id),
-            'NotificationURL' => route('portal.tinkoff-bank.invoices.fail', $invoice->id),
-            'DATA' => [
-                'telegram_channel_buy' => $invoice->company->telegram_channel_id,
-                'telegram_buyer_nickname' => $invoice->contact->telegram_id,
-                'telegram_buyer_id' => $invoice->contact->telegram_chat_id,
-            ],
+            'SuccessURL' => URL::signedRoute('signed.tinkoff-bank.invoices.success', ['invoice' => $invoice->id, 'company_id' => $invoice->company_id,]),
+            'FailURL' => URL::signedRoute('signed.tinkoff-bank.invoices.fail', ['invoice' => $invoice->id, 'company_id' => $invoice->company_id,]),
+            'NotificationURL' => route('tinkoff-bank.invoices.notification'),
+            "Amount" => bcmul($this->currenciesService->convert($invoice->amount, $invoice->currency_code, 'RUB'), '100'),
             'Language' => 'en',
             'IP' => $request->ip(),
+            'RedirectDueDate' => now()->modify('+10 minute')->format(DATE_ATOM),
         ];
 
         $items = [];
         foreach($invoice->items()->cursor() as $item) {
             /** @var DocumentItem $item */
-            $items = [
+            $items[] = [
                 "Name" => mb_substr($item->name, 0, 64),
                 "Price" => (int) bcmul($this->currenciesService->convert($item->price, $invoice->currency_code, 'RUB'), '100'),
-                "Quantity" => $item->quantity,
-                "Amount" => (int) bcmul($this->currenciesService->convert($item->total, $invoice->currency_code, 'RUB'), '100'),
+                "Quantity" => (float) $item->quantity,
+                "Amount" => (int) bcmul($this->currenciesService->convert($item->total, $invoice->currency_code, 'RUB') * $item->quantity, '100'),
                 "PaymentObject" => 'service',
+                "PaymentMethod" => 'full_payment',
                 "Tax" => 'none',
             ];
         }
@@ -77,8 +73,12 @@ class Payment extends PaymentController
             'Taxation' => $setting['taxation'] ?? 'patent',
             'Items' => $items,
         ];
-
-        $tinkoff = $this->getSdk($invoice->company);
+        logger('Sending request to tinkoff', [
+            'company' => $invoice->company->id,
+            'invoice' => $invoice->id,
+            'Init' => $initParams,
+        ]);
+        $tinkoff = $this->getSdk($invoice->company, $setting);
         $responseJson = $tinkoff->buildQuery('Init', $initParams);
         $responseJson = json_decode($responseJson, true, 512, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
 
@@ -87,6 +87,7 @@ class Payment extends PaymentController
             'invoice' => $invoice->id,
             'response' => $responseJson,
         ]);
+
         if (!isset($responseJson['PaymentURL'], $responseJson['PaymentId'])) {
             return response()->json([
                 'html' => '<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> Service temporary unavailable: terminal does not configure.</div>'
@@ -102,6 +103,8 @@ class Payment extends PaymentController
 
         $html = view('tinkoff-bank::show', compact('setting', 'invoice', 'invoice_url'))->render();
 
+        $this->setContactFirstLastName($invoice);
+
         return response()->json([
             'code' => $setting['code'],
             'name' => $setting['name'] ?? 'Credit Card',
@@ -112,9 +115,9 @@ class Payment extends PaymentController
     }
 
     // fail url
-    public function fail(Document $invoice, Request $request)
+    public function fail(Document $invoice)
     {
-        flash(trans('messages.error.added', ['type' => trans_choice('general.payments', 1)]))->warning();
+        flash(trans('messages.error.added', ['type' => strtolower(trans_choice('general.payments', 1))]))->warning();
         $invoice_url = $this->getInvoiceUrl($invoice);
 
         return redirect($invoice_url);
@@ -123,62 +126,106 @@ class Payment extends PaymentController
     // success  url
     public function success(Document $invoice, Request $request)
     {
-        flash(trans('messages.success.added', ['type' => trans_choice('general.payments', 1)]))->success();
+        if ($invoice->status !== 'paid') {
+            try {
+                if ($this->makeTinkoffCheck($invoice, $request)) {
+                    flash(trans('messages.success.success', ['type' => trans_choice('general.payments', 1)]))->success();
+                } else {
+                    flash(trans('messages.error.payment_cancelled', ['type' => strtolower(trans_choice('general.payments', 1))]))->warning();
+                }
+                $this->getSdk($invoice->company, $this->setting)->buildQuery('Resend', []);
+            } catch (\Throwable $e) {
+                info('Error on success payment: ' . $e->getMessage(), ['e' => $e,]);
+            }
+        }
 
         $invoice_url = $this->getInvoiceUrl($invoice);
 
         return redirect($invoice_url);
     }
 
+    /**
+     * @throws \Illuminate\Validation\ValidationException
+     * @throws \JsonException
+     */
+    public function notification(Request $request)
+    {
+        \Validator::make($request->all(), [
+            'OrderId' => 'required|numeric|exists:App\Models\Document\Document,id',
+        ])->validate();
+
+        $this->complete((new Document)->newQueryWithoutScope(CompanyScope::class)->findOrFail($request->get('OrderId')), $request);
+
+        return 'OK';
+    }
+
     public function complete(Document $invoice, Request $request)
     {
-        $tksLogger = new Logger('Tinkoff');
-
-        $tksLogger->pushHandler(new StreamHandler(storage_path('logs/tinkoff.log')), Logger::DEBUG);
-        $tksLogger->info('Incoming request from tinkoff', [
+        info('Incoming request from tinkoff', [
             'ip' => $request->ips(),
             'request' => $request->all(),
             'method' => $request->method(),
             'invoice' => $invoice->id ?? null
         ]);
+        if (!$invoice->id) {
+            throw new NotFoundHttpException('Invoice not found');
+        }
 
-        if (!$invoice) {
-            return;
-        }
-        if (!isset($request['OrderId'])) {
-            $tksLogger->warning('OrderId is undefined from tinkoff');
-            return;
-        }
         if (!$invoice->order_number) {
-            $tksLogger->warning('OrderNumber is undefined from us');
-            return;
+            throw new NotFoundHttpException('Order number not found');
         }
 
-        $tinkoff = $this->getSdk($invoice->company);
+
+        $this->makeTinkoffCheck($invoice, $request);
+
+        return 'OK';
+    }
+
+    public function getSdk(Company $company, array $setting): TinkoffSDK
+    {
+        return $this->sdk[$company->id] ?? $this->sdk[$company->id] = new TinkoffSDK(
+                $setting['terminal_key'] ?? null,
+                $setting['secret_key'] ?? null
+            );
+    }
+
+    private function makeTinkoffCheck(Document $invoice, Request $request): bool
+    {
+        $invoice->company->makeCurrent(true);
+
+        $tinkoff = $this->getSdk($invoice->company, setting($this->alias));
         $state = $tinkoff->getState([
             'PaymentId' => $invoice->order_number,
         ]);
 
         $responseJson = json_decode($state, true, 512, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-        $tksLogger->info('Got response from tinkoff about payment state', [
+        info('Got response from tinkoff about payment state', [
             'company' => $invoice->company->id,
             'invoice' => $invoice->id,
             'response' => $responseJson,
         ]);
 
-        if (true === (bool)$responseJson['Success']) {
-            $tksLogger->info('Payment received', ['invoice' => $invoice->id,]);
-            event(new PaymentReceived($invoice, $request->merge(['type' => 'income'])));
+        $isOk = $responseJson['Status'] === 'CONFIRMED' && true === (bool)$responseJson['Success'];
+        if ($isOk) {
+            info('Payment received', ['invoice' => $invoice->id,]);
+            if ($invoice->status !== 'paid') {
+                try {
+                    event(new PaymentReceived($invoice, $request->merge(['type' => 'income'])));
+                } catch (\Throwable $e) {
+                    info('Error on payment received: ' . $e->getMessage());
+                }
+            }
         } else {
-            $tksLogger->info('Payment did not received, status not eq true', ['invoice' => $invoice->id,]);
+            if ($invoice->status !== 'cancelled') {
+                try {
+                    event(new DocumentCancelled($invoice));
+                } catch (\Throwable $e) {
+                    info('Error on document cancelled: ' . $e->getMessage());
+                }
+            }
+            info('Payment did not received, status not eq true', ['invoice' => $invoice->id,]);
         }
-    }
 
-    public function getSdk(Company $company): TinkoffSDK
-    {
-        return $this->sdk[$company->id] ?? $this->sdk[$company->id] = new TinkoffSDK(
-                $company->settings['tinkoff-bank.terminal_key'] ?? null,
-                $company->settings['tinkoff-bank.secret_key'] ?? null
-            );
+        return $isOk;
     }
 }

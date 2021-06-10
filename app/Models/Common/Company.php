@@ -12,6 +12,7 @@ use App\Traits\Media;
 use App\Traits\Tenants;
 use App\Traits\Transactions;
 use App\Utilities\Overrider;
+use Doctrine\Common\Collections\Collection;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Kyslik\ColumnSortable\Sortable;
@@ -29,6 +30,7 @@ use Lorisleiva\LaravelSearchString\Concerns\SearchString;
  * @property int $telegram_channel_id Its private chat with invite-link access
  * @property array $telegram_additional_public_channels
  * @property Item[] $items
+ * @property-read Collection $settings
  */
 class Company extends Eloquent
 {

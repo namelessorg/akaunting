@@ -11,6 +11,8 @@ use App\Models\Document\Document;
 use App\Models\Document\DocumentItem;
 use App\Models\Setting\Category;
 use App\Services\TelegramService;
+use Carbon\CarbonInterval;
+use Illuminate\Support\Carbon;
 
 class ProlongUserExpiration
 {
@@ -63,7 +65,12 @@ class ProlongUserExpiration
             [$command, $args] = $buff;
             switch ($command) {
                 case 'user':
-                    $contact->expires_at = $args;
+                    if (null !== $contact->expires_at) {
+                        $contact->expires_at = $contact->expires_at->add(now()->diff($args, true));
+                    } else {
+                        $contact->expires_at = $args;
+                    }
+
                     $contact->enabled = true;
                     $contact->save();
                     break;
